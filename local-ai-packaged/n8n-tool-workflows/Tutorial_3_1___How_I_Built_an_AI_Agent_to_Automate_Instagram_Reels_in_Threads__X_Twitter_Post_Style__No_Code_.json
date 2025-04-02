@@ -1,0 +1,1284 @@
+{
+  "name": "Tutorial 3.1 - How I Built an AI Agent to Automate Instagram Reels in Threads/ X Twitter Post Style (No-Code)",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id={{ $json.app_id }}&client_secret={{ $json.app_secret }}&fb_exchange_token={{ $json.access_token }}",
+        "options": {}
+      },
+      "id": "6e1c4abe-4e06-4bfe-bdae-83bc0086f4a2",
+      "name": "Exchange Long Credentials",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3480,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## First Time Get Long Lived Access Token",
+        "height": 251.7688230124266,
+        "width": 686.6152350287123,
+        "color": 7
+      },
+      "id": "3162b14e-e504-4402-adad-b3d3a9e6aabb",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3140,
+        940
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "45ae74a0-7d74-4ca4-909b-276a63578442",
+              "name": "access_token",
+              "value": "xxx",
+              "type": "string"
+            },
+            {
+              "id": "c3ad863b-e3e8-4258-bd29-f408c1bf900a",
+              "name": "app_secret",
+              "value": "xxx",
+              "type": "string"
+            },
+            {
+              "id": "67800dde-27f3-402a-bb29-221fb6a1480e",
+              "name": "account_id",
+              "value": "xxxxxxxxxxxxx",
+              "type": "string"
+            },
+            {
+              "id": "c8676dfd-f42b-4b37-92cc-95a2d4dfe0fe",
+              "name": "language",
+              "value": "Traditional Chinese (Hong Kong)",
+              "type": "string"
+            },
+            {
+              "id": "0893dc2a-2cad-43dc-9aa8-b7a461e4d04f",
+              "name": "app_id",
+              "value": "xxx",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f675e85-3563-4b1e-9bcb-6ab3eec1cd58",
+      "name": "First Access Global",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3320,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "instagram-credentials",
+          "mode": "list",
+          "cachedResultName": "instagram-credentials"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "account_id",
+        "valueToMatchOn": "={{ $('First Access Global').item.json.account_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "token_type",
+              "value": "={{ $json.token_type }}"
+            },
+            {
+              "column": "expires_in",
+              "value": "={{ $now + $json.expires_in }}"
+            },
+            {
+              "column": "access_token",
+              "value": "={{ $json.access_token }}"
+            },
+            {
+              "column": "language",
+              "value": "={{ $('First Access Global').item.json.language }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "be8e7fb4-35f1-4cec-83ed-a0cb2223d076",
+      "name": "Save Token",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        3660,
+        1020
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "m2P8mdePkKqjaaNc",
+          "name": "MySQL Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "21ad628c-3a2c-4677-93b0-eab2a49c9be1",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        3180,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "instagram-credentials",
+          "mode": "list",
+          "cachedResultName": "instagram-credentials"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "publish",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c98b8271-8e25-459d-b33d-1daded2da70f",
+      "name": "Grab Access Token",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        3480,
+        1300
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "m2P8mdePkKqjaaNc",
+          "name": "MySQL Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1a534ac4-7f73-4c6d-87d2-6f2ffc9a2748",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3640,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxx",
+          "mode": "list",
+          "cachedResultName": "Instagram Post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $json.account_id }}",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Post Status"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "795a7ab7-3a8a-464b-a9cf-4014c39183e9",
+      "name": "Grab Post",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3800,
+        1320
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXkt3mkIhz4ruk1c",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "5887ae30-a0e4-4f34-8b6c-c02341c04f42",
+      "name": "Limit",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        3940,
+        1320
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  const newContent = item?.json[\"New Threads Content\"]\n    .split(\"----Thread----\")\n    .map((word) => word.trim());\n  item.json[\"New Threads Content\"] = newContent;\n  return item;\n});\nreturn updatedItems;\n"
+      },
+      "id": "22a25c14-5d22-42d3-b22a-90acff678232",
+      "name": "Split Threads",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4080,
+        1320
+      ]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "['New Threads Content']",
+        "options": {}
+      },
+      "id": "c75b20bf-4892-4b1f-92d2-5482c76019f5",
+      "name": "Split Out Thread",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        4220,
+        1320
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Add Profile Image and Details",
+        "height": 246.66792792882086,
+        "width": 1211.001785128457
+      },
+      "id": "d2c052fa-b229-4c67-b029-76bf01a1f62e",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3880,
+        940
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "instagram-credentials",
+          "mode": "list",
+          "cachedResultName": "instagram-credentials"
+        },
+        "limit": 1,
+        "where": {
+          "values": [
+            {
+              "column": "publish",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8bb1e558-3ea1-4f23-be9a-18a4322ab885",
+      "name": "Grab First Access Token",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        4100,
+        1020
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "m2P8mdePkKqjaaNc",
+          "name": "MySQL Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/me/accounts?access_token={{ $json.access_token }}",
+        "options": {}
+      },
+      "id": "dd8638ae-52b8-4a46-83c5-706a8ce809f7",
+      "name": "Get Page Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4260,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/{{ $json.data[0].id }}?fields=instagram_business_account&access_token={{ $('Grab First Access Token').item.json.access_token }}",
+        "options": {}
+      },
+      "id": "7d17fdef-d982-483d-8e8d-54c96cf5a3e2",
+      "name": "Get Linked Instagram Accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4440,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/{{ $json.instagram_business_account.id }}?fields=username,name,profile_picture_url&access_token={{ $('Grab First Access Token').item.json.access_token }}",
+        "options": {}
+      },
+      "id": "c4228340-52c2-4e6c-973f-f16b63b665a7",
+      "name": "Retrieve Instagram Account Information",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4620,
+        1020
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "table": {
+          "__rl": true,
+          "value": "instagram-credentials",
+          "mode": "list",
+          "cachedResultName": "instagram-credentials"
+        },
+        "dataMode": "defineBelow",
+        "columnToMatchOn": "account_id",
+        "valueToMatchOn": "={{ $('Grab First Access Token').item.json.account_id }}",
+        "valuesToSend": {
+          "values": [
+            {
+              "column": "video_attributes",
+              "value": "={\"username\": \"{{ $json.username }}\",\"name\": \"{{ $json.name }}\",\"profile_picture_url\": \"{{ $json.profile_picture_url }}\"}"
+            },
+            {
+              "column": "instagram_id",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e5aeb3b1-9b2f-4dc5-aaff-a0fef78de1d9",
+      "name": "Update Attribute",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        4820,
+        1020
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "m2P8mdePkKqjaaNc",
+          "name": "MySQL Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a135c175-8cc0-4646-b15b-4c991eaad14d",
+              "name": "video_api_key",
+              "value": "xxx",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e47086e0-2565-4d8a-8986-55df0a76fdf1",
+      "name": "Global API",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3320,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://ai-automation-community.vercel.app/api/function/video-generation?api_key={{ $('Global API').item.json.video_api_key }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"type\": \"TextVideo\",\n    \"data\": {\n        \"background_type\": \"3\",\n        \"name\": \"{{ $('Grab Access Token').item.json.video_attributes.name }}\",\n        \"username\": \"{{ $('Grab Access Token').item.json.video_attributes.username }}\",\n        \"profile_url\": \"{{ $('Grab Access Token').item.json.video_attributes.profile_picture_url }}\",\n        \"content\": \"{{ $json['[\\'New Threads Content\\']'].replace(/\\n/g, '\\\\n') }}\"\n    }\n}",
+        "options": {}
+      },
+      "id": "370fee1a-7bf5-4192-b4a7-cd875bf7ac49",
+      "name": "Create Video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3680,
+        1520
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "c3427361-6f99-4da9-9d9a-cbbc80e57561",
+      "name": "Limit First Post",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        4380,
+        1320
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "id": "5d787bfa-840d-4630-a17e-8e9892dcd7bd",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3820,
+        1520
+      ],
+      "webhookId": "6dcdb833-896a-4f5c-94b9-3951378fb12b"
+    },
+    {
+      "parameters": {
+        "url": "=https://ai-automation-community.vercel.app/api/function/video-generation/progress/{{ $json.data.id }}?api_key={{ $('Global API').item.json.video_api_key }}",
+        "options": {}
+      },
+      "id": "ef7ac566-0bbe-45fe-8d96-50e344a824f1",
+      "name": "Get Video Progress",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3960,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxx",
+          "mode": "list",
+          "cachedResultName": "Instagram Post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Loop Over Items').item.json.account_id }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Grab Post').item.json.row_number }}",
+            "Video Url": "={{ $('Get Video Progress').item.json.data.url }}",
+            "Post Status": "pending",
+            "Captions": "={{ $json.message.content }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Original Threads Content",
+              "displayName": "Original Threads Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "New Threads Content",
+              "displayName": "New Threads Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Images",
+              "displayName": "Images",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Video Url",
+              "displayName": "Video Url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post Status",
+              "displayName": "Post Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post Time",
+              "displayName": "Post Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Issues",
+              "displayName": "Issues",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Captions",
+              "displayName": "Captions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b6d2ea43-c259-4ad3-bfb8-74008a88c474",
+      "name": "Update Video URL",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        4400,
+        1520
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXkt3mkIhz4ruk1c",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Upload Video\n",
+        "height": 391.45046151227405,
+        "width": 1567.2557438933939,
+        "color": 3
+      },
+      "id": "f363b42b-5707-490d-876b-23c3aa04ec27",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3140,
+        1760
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "select",
+        "table": {
+          "__rl": true,
+          "value": "instagram-credentials",
+          "mode": "list",
+          "cachedResultName": "instagram-credentials"
+        },
+        "returnAll": true,
+        "where": {
+          "values": [
+            {
+              "column": "publish",
+              "value": "1"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8e468548-94c6-4087-baa2-e9ae732124d2",
+      "name": "Grab Access Token - Video",
+      "type": "n8n-nodes-base.mySql",
+      "typeVersion": 2.4,
+      "position": [
+        3360,
+        1860
+      ],
+      "credentials": {
+        "mySql": {
+          "id": "m2P8mdePkKqjaaNc",
+          "name": "MySQL Workflow"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ee8a00ea-1bb1-440e-9edb-b8ae08182901",
+      "name": "Loop Over Items1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3540,
+        1860
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxx",
+          "mode": "list",
+          "cachedResultName": "Instagram Post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $json.account_id }}",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Post Status",
+              "lookupValue": "pending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f0416ac-c089-45fb-b378-cb2c9629de0b",
+      "name": "Grab Video",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        3720,
+        1880
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXkt3mkIhz4ruk1c",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "3927d953-3991-402f-a33f-d17bd434fdc6",
+      "name": "Limit1",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        3880,
+        1880
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/{{ $('Loop Over Items1').item.json.instagram_id }}/media",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"media_type\": \"REELS\",\n  \"video_url\": \"{{ $json['Video Url'] }}\",\n  \"caption\": \"{{ $json.Captions.replace(/\\n/g, '\\\\n') }}\",\n  \"access_token\": \"{{ $('Loop Over Items1').item.json.access_token }}\"\n}",
+        "options": {}
+      },
+      "id": "d2ecb386-2320-4c2b-b31a-0fa50b604c0a",
+      "name": "Post Instagram Media",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4040,
+        1880
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "minutes"
+      },
+      "id": "277fefeb-40a2-4fa2-86d7-9332e32a8fa8",
+      "name": "Wait1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4200,
+        1880
+      ],
+      "webhookId": "3392ffb7-a915-4b05-b7b1-bd3728550809"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/{{ $('Loop Over Items1').item.json.instagram_id }}/media_publish",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"creation_id\": \"{{ $json.id }}\",\n  \"access_token\": \"{{ $('Loop Over Items1').item.json.access_token }}\"\n}",
+        "options": {}
+      },
+      "id": "5fd24f6d-0864-41b1-bdb2-1447e6c5f8b3",
+      "name": "Post Instagram Reel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4360,
+        1880
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxx",
+          "mode": "list",
+          "cachedResultName": "Instagram Post",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Loop Over Items1').item.json.account_id }}",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Limit1').item.json.row_number }}",
+            "Post Status": "posted",
+            "Post Time": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Original Threads Content",
+              "displayName": "Original Threads Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "New Threads Content",
+              "displayName": "New Threads Content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Images",
+              "displayName": "Images",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Video Url",
+              "displayName": "Video Url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Post Status",
+              "displayName": "Post Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post Time",
+              "displayName": "Post Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Issues",
+              "displayName": "Issues",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Captions",
+              "displayName": "Captions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "70e7194c-39ff-49ea-b6fc-7a79419c6342",
+      "name": "Update Video Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        4520,
+        1880
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXkt3mkIhz4ruk1c",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "Convert the following Twitter post into an Instagram caption. Ensure the tone is engaging and suitable for Instagram, with a focus on visuals, hashtags, and a call-to-action where appropriate. Maintain the core message while adapting it for a longer and more expressive format.\n\nMaximum Total Text Length: 300\n\nInstagram Caption:\nInclude relevant hashtags, emojis, and visual references in your response.",
+              "role": "system"
+            },
+            {
+              "content": "={{ $('Grab Post').item.json['New Threads Content'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "41ff5293-918a-48cd-819a-ff0ed7e1f9ce",
+      "name": "Create Captions",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        4100,
+        1520
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8UV",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Create Instagram Video & Caption",
+        "height": 498.69304287176243,
+        "width": 1427.1986220799315,
+        "color": 4
+      },
+      "id": "3313466c-75b6-4857-9a59-4a5fffc036a1",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3140,
+        1220
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Exchange Long Credentials": {
+      "main": [
+        [
+          {
+            "node": "Save Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "First Access Global": {
+      "main": [
+        [
+          {
+            "node": "Exchange Long Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grab Access Token": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Grab Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grab Post": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Split Threads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Threads": {
+      "main": [
+        [
+          {
+            "node": "Split Out Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Global API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grab First Access Token": {
+      "main": [
+        [
+          {
+            "node": "Get Page Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Page Access Token": {
+      "main": [
+        [
+          {
+            "node": "Get Linked Instagram Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Linked Instagram Accounts": {
+      "main": [
+        [
+          {
+            "node": "Retrieve Instagram Account Information",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve Instagram Account Information": {
+      "main": [
+        [
+          {
+            "node": "Update Attribute",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Global API": {
+      "main": [
+        [
+          {
+            "node": "Grab Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out Thread": {
+      "main": [
+        [
+          {
+            "node": "Limit First Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit First Post": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Video Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Progress": {
+      "main": [
+        [
+          {
+            "node": "Create Captions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grab Access Token - Video": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Grab Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grab Video": {
+      "main": [
+        [
+          {
+            "node": "Limit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit1": {
+      "main": [
+        [
+          {
+            "node": "Post Instagram Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Instagram Media": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Post Instagram Reel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Instagram Reel": {
+      "main": [
+        [
+          {
+            "node": "Update Video Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Video URL": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Video Status": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Captions": {
+      "main": [
+        [
+          {
+            "node": "Update Video URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "672e7ac1-ffc4-46a7-935c-ec6b1e03a411",
+  "meta": {
+    "templateId": "2557",
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4221cc7208f142ff91856b22776eec81b71c256154ec8030569832c22d0c66d9"
+  },
+  "id": "Hyb7LkAosloDxW0H",
+  "tags": []
+}

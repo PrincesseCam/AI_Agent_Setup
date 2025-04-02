@@ -1,0 +1,368 @@
+{
+  "name": "13.1.2 GHL Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {},
+        "options": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.highLevel",
+      "typeVersion": 2,
+      "position": [
+        180,
+        -220
+      ],
+      "id": "771dce73-a45e-4c10-885f-dc8bc86e9e11",
+      "name": "HighLevel4",
+      "credentials": {
+        "highLevelOAuth2Api": {
+          "id": "JvMblsEo9EjXLCOq",
+          "name": "HighLevel account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        40
+      ],
+      "id": "09b0f6bd-b2cb-498a-b4fd-410d15b25bb5",
+      "name": "Execute Workflow Trigger"
+    },
+    {
+      "parameters": {
+        "resource": "opportunity",
+        "operation": "getAll",
+        "filters": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.highLevel",
+      "typeVersion": 2,
+      "position": [
+        180,
+        -40
+      ],
+      "id": "29f94518-2a9d-4d0f-a7ce-d74eb6dbf9c1",
+      "name": "HighLevel1",
+      "credentials": {
+        "highLevelOAuth2Api": {
+          "id": "JvMblsEo9EjXLCOq",
+          "name": "HighLevel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "opportunity",
+        "pipelineId": "WOhcodVLw2J8HsymeOhC",
+        "contactId": "={{ $json.data.contact_id }}",
+        "name": "={{ $json.data.name }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.highLevel",
+      "typeVersion": 2,
+      "position": [
+        180,
+        300
+      ],
+      "id": "cf8fe24e-f213-4f01-a808-6751578c94b1",
+      "name": "HighLevel",
+      "credentials": {
+        "highLevelOAuth2Api": {
+          "id": "JvMblsEo9EjXLCOq",
+          "name": "HighLevel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "email": "={{ $json.data.email }}",
+        "phone": "={{ $json.data.phone }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.highLevel",
+      "typeVersion": 2,
+      "position": [
+        180,
+        120
+      ],
+      "id": "a5879930-7b6f-4fa7-81e2-d7b50e71ef90",
+      "name": "HighLevel2",
+      "credentials": {
+        "highLevelOAuth2Api": {
+          "id": "JvMblsEo9EjXLCOq",
+          "name": "HighLevel account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "get_contact",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "get_contact"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3d54ca18-8215-4dd8-9fae-9c06d3e4bdd3",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "get_opportunity",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "get_opportunity"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "fd0505f8-8249-4c61-aef7-43c935e43cb2",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "create_contact",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create_contact"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "31b7fbae-6eb2-4307-8656-758f94a5ad19",
+                    "leftValue": "={{ $json.type }}",
+                    "rightValue": "create_opportunity",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create_opportunity"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -40,
+        20
+      ],
+      "id": "9c2dbe3d-d0be-41a3-90bb-71758f5752fb",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "jsCode": "return JSON.parse($input.first().json.query);"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        40
+      ],
+      "id": "f62551d4-d5b7-43b5-bc3c-3519e87fa3a8",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a13f9630-47eb-4020-ac20-08d7c3cb8f51",
+              "name": "response",
+              "value": "={{ $json }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        420,
+        40
+      ],
+      "id": "674211e7-0ce8-479f-93c5-1e82733c9b5a",
+      "name": "Response"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HighLevel2": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "HighLevel4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HighLevel1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HighLevel2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HighLevel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HighLevel1": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HighLevel4": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HighLevel": {
+      "main": [
+        [
+          {
+            "node": "Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "2450a0d5-42b9-4f53-b498-14452aabb54e",
+  "meta": {
+    "instanceId": "4221cc7208f142ff91856b22776eec81b71c256154ec8030569832c22d0c66d9"
+  },
+  "id": "5qADWkPlZ2vKipNy",
+  "tags": []
+}

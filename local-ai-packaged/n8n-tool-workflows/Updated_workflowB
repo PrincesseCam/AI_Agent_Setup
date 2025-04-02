@@ -1,0 +1,551 @@
+{
+  "name": "WorkflowB_WhisperTranscription&SRTCreation",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.40.98:5000/transcribe",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "=file",
+              "inputDataFieldName": "=data"
+            },
+            {
+              "name": "response_format",
+              "value": "verbose_json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e0e52ade-3119-4651-a470-1e1adbf6ca40",
+      "name": "Whisper (Local)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        300,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n    const segments = $input.first().json.segments;\n    const result = [];\n\n    let startTime = segments[0].words[0].start;\n    let endTime = startTime + 6;\n    let currentGroup = [];\n    let index = 0;\n\n    for (const segment of segments) {\n        for (const word of segment.words) {\n            if (word.start < endTime) {\n                currentGroup.push(word.word);\n            } else {\n                index++;\n                result.push({\n                    text: currentGroup.join(' '),\n                    start: startTime,\n                    end: word.end,\n                    index: index\n                });\n\n                startTime = word.start;\n                endTime = startTime + 6;\n                currentGroup = [word.word];\n            }\n        }\n    }\n\n    if (currentGroup.length > 0) {\n        index++;\n        result.push({\n            text: currentGroup.join(' '),\n            start: startTime,\n            end: segments[segments.length - 1].words.slice(-1)[0].end,\n            index: index\n        });\n    }\n\n    return {\n        json: {\n            groups: result,\n        },\n    };\n});"
+      },
+      "id": "714a19a9-8b17-4ba0-8508-5c6857d34bec",
+      "name": "Parse & Create SRT",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  // 1) Check the field name that holds the array. Suppose it's `groups`:\n  const groups = $input.first().json.groups || [];\n  const allWords = [];\n\n  // 2) Flatten out each group's text into words\n  for (const group of groups) {\n    const wordsArray = group.text.split(/\\s+/);\n    // push each word with the same start/end\n    for (const w of wordsArray) {\n      allWords.push({\n        text: w,\n        start: group.start,\n        end: group.end,\n      });\n    }\n  }\n\n  // 3) Now chunk them by 3 words each\n  const result = [];\n  for (let i = 0; i < allWords.length; i += 3) {\n    const chunk = allWords.slice(i, i + 3);\n    result.push({\n      words: chunk.map(word => word.text).join(' '),\n      start: chunk[0].start,\n      end: chunk[chunk.length - 1].end,\n    });\n  }\n\n  return {\n    json: {\n      chunks: result,\n    },\n  };\n});\n"
+      },
+      "id": "2018d0c1-17cc-488c-83f9-7777c0181ef4",
+      "name": "Combine Transcript",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        600,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\n  \"fileName\": \"string\"\n}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -280,
+        -360
+      ],
+      "id": "212ec264-5ab5-4657-a817-16d89f658608",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/shared/voiceover/0001.mp3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        120,
+        0
+      ],
+      "id": "91e5744f-2b42-4f92-915f-68ec35b9dad2",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "groups",
+        "options": {}
+      },
+      "id": "6eadeaa8-cef5-48d4-9e80-494604f31d37",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1100,
+        240
+      ],
+      "id": "a0ff64de-abb4-4f8c-b8cc-e9dfb56b07e6",
+      "name": "Wait",
+      "webhookId": "4f8ba4b2-5177-4871-bb8f-eff3a98de309"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "chunks",
+        "options": {}
+      },
+      "id": "87bd195b-6602-4d5a-ab4c-c46a0dc844bc",
+      "name": "Split Out1",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        820,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "tUW7eo6JXnNnhjGH",
+          "mode": "list",
+          "cachedResultName": "WorkflowD_FFmpeg_Assembly"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "words": "={{ $('Split Out1').item.json.words }}",
+            "start": "={{ $('Split Out1').item.json.start }}",
+            "end": "={{ $('Split Out1').item.json.end }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "words",
+              "displayName": "words",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "start",
+              "displayName": "start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "end",
+              "displayName": "end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1340,
+        540
+      ],
+      "id": "9d7646dd-2863-447d-b293-f2f41dd7e7ec",
+      "name": "Execute WorkflowD"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "sfBZKzqWXKXffDdJ",
+          "mode": "list",
+          "cachedResultName": "WorkflowC_PromptCreation&ImageGeneration"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "start": "={{ $json.start }}",
+            "end": "={{ $json.end }}",
+            "index": "={{ $json.index }}",
+            "text": "={{ $json.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "text",
+              "displayName": "text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            },
+            {
+              "id": "start",
+              "displayName": "start",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "end",
+              "displayName": "end",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            },
+            {
+              "id": "index",
+              "displayName": "index",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "number",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": true,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": false
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1060,
+        0
+      ],
+      "id": "dbc66913-665b-459c-8aad-03e17c53586c",
+      "name": "Execute WorkflowC",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/shared/images/*",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        -480
+      ],
+      "id": "f351ab37-dffe-4a12-a9f0-a38093216065",
+      "name": "Read Images"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/shared/voiceover/0001.mp3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        -280
+      ],
+      "id": "a2388137-a7b8-4c0e-8fb7-dcf2bf8b027f",
+      "name": "Read voice over"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/data/shared/audio/bg.mp3",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        -80
+      ],
+      "id": "4ac9b4ca-f811-4aed-a516-1e7c3813b90d",
+      "name": "Read backgroud audio"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1940,
+        220
+      ],
+      "id": "5f93ab5a-469a-41c3-b22d-2adc12168a99",
+      "name": "Merge2",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "jsCode": "// We'll receive 53 items total from Merge. \n// Some have mimeType === 'image/png' (images).\n// Some have mimeType === 'audio/mpeg' (voice or background).\n// Some have words/start/end (transcript).\n\nconst all = items; // array of item objects\n\nconst chunks = [];\nconst images = [];\nlet voiceOver = null;\nlet backgroundAudio = null;\n\n// Helper: build a path\nfunction buildPath(dir, file) {\n  return `${dir}/${file}`;\n}\n\nfor (const item of all) {\n  const data = item.json; \n\n  // 1) Is it a transcript chunk?\n  if (data.words !== undefined && data.start !== undefined && data.end !== undefined) {\n    // It's transcript\n    chunks.push({ words: data.words, start: data.start, end: data.end });\n  }\n  // 2) Is it an image?\n  else if (data.mimeType === 'image/png') {\n    // Combine directory + fileName \n    images.push(buildPath(data.directory, data.fileName));\n  }\n  // 3) Is it audio (voice or background)?\n  else if (data.mimeType === 'audio/mpeg') {\n    // Distinguish voice vs. background by fileName or directory\n    if (data.directory.includes('voiceover')) {\n      voiceOver = buildPath(data.directory, data.fileName);\n    } else if (data.directory.includes('audio')) {\n      backgroundAudio = buildPath(data.directory, data.fileName);\n    }\n  }\n  // If none match, do nothing or console.log\n}\n\n// Return a single item with these arrays/fields\nreturn [\n  {\n    json: {\n      chunks,\n      images,\n      voiceOver,\n      backgroundAudio\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        240
+      ],
+      "id": "e5a13b26-b0df-4758-8554-61bd87756c88",
+      "name": "Group all items"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Save the data from the previous node to a JSON file\nconst fs = require('fs');\nconst path = require('path');\n\n// Get the data from the previous node\nconst videoData = $input.first().json;\n\n// Set path for the JSON data file\nconst dataFilePath = '/data/shared/video_data.json';\n\n// Write the data to a JSON file\nfs.writeFileSync(dataFilePath, JSON.stringify(videoData, null, 2));\n\nreturn [\n  {\n    json: {\n      dataFile: dataFilePath,\n      message: 'Data file created successfully for video generation'\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2340,
+        240
+      ],
+      "id": "3a1b89c7-5eb9-4d93-bdf3-cd1b23e9f8b1",
+      "name": "Prepare Video Data"
+    },
+    {
+      "parameters": {
+        "command": "#!/bin/bash\n\n# Copy the Python script to the shared directory if not already there\nif [ ! -f /data/shared/scripts/ffmpeg-video-generator.py ]; then\n  mkdir -p /data/shared/scripts\n  cp /path/to/ffmpeg-video-generator.py /data/shared/scripts/\n  chmod +x /data/shared/scripts/ffmpeg-video-generator.py\nfi\n\n# Execute the Python script with the data file as input\ndocker exec ffmpeg python3 /data/shared/scripts/ffmpeg-video-generator.py --data /data/shared/video_data.json"
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        2560,
+        240
+      ],
+      "id": "e3294f45-e118-4b65-b7cb-50757d2af7ab",
+      "name": "Execute Python Video Generator"
+    }
+  ],
+  "connections": {
+    "Whisper (Local)": {
+      "main": [
+        [
+          {
+            "node": "Parse & Create SRT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Create SRT": {
+      "main": [
+        [
+          {
+            "node": "Combine Transcript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Transcript": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read Images",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read voice over",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Read backgroud audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Whisper (Local)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Execute WorkflowC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Images": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read voice over": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Read backgroud audio": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Group all items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Group all items": {
+      "main": [
+        [
+          {
+            "node": "Prepare Video Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Video Data": {
+      "main": [
+        [
+          {
+            "node": "Execute Python Video Generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ad3c9501-f573-42ab-ab10-97bf0dce2aae",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4e52379637041ff10799c16d4fe1175e0d88d75b24685ea7cde857d7eef2b827"
+  },
+  "id": "t2tXZ9Qnx3FoH3FY",
+  "tags": []
+}

@@ -1,0 +1,2186 @@
+{
+  "name": "13.1 The Only Personal AI Assistant You Need - Donna AI",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {}
+      },
+      "id": "ae09c3c8-cfc5-4621-9459-8067c34e5587",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1,
+      "position": [
+        1620,
+        420
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8UV",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Whatsapp handler",
+        "height": 755,
+        "width": 1536,
+        "color": 2
+      },
+      "id": "77e7dd42-b259-4de5-941b-da9e02b566e2",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to delete a calendar event.",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "andylo@proxa.cc",
+          "mode": "list",
+          "cachedResultName": "Meeting"
+        },
+        "eventId": "={{ $fromAI(\"eventId\",\"it is the event id of the calendar event\") }}",
+        "options": {}
+      },
+      "id": "6fdb3aaa-1b17-4e01-9f69-5ef8eb2fb533",
+      "name": "Delete Calendar Event",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        920,
+        860
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CoQzrf1SdD6Lgqgv",
+          "name": "Google Calendar - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to create a new calendar event.",
+        "calendar": {
+          "__rl": true,
+          "value": "c_ad8ed544cbde04624ac52927a5e5815f258006fe98167c72def1848daad5f795@group.calendar.google.com",
+          "mode": "list",
+          "cachedResultName": "Tasks"
+        },
+        "start": "={{ $fromAI(\"eventStartTime\",\"it is the meeting date starting time\") }}",
+        "end": "={{ $fromAI(\"eventEndTime\",\"it is the meeting date ending time\") }}",
+        "additionalFields": {
+          "attendees": [
+            "={{ $fromAI(\"emailAddressAttendee\",\"it is the email address of the attendee\") }}"
+          ],
+          "summary": "={{ $fromAI(\"eventName\",\"the name of the calendar event\") }}"
+        }
+      },
+      "id": "5f8961f1-671e-4ed6-91e9-2c5d415d279f",
+      "name": "Creating Calendar Event",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        780,
+        860
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CoQzrf1SdD6Lgqgv",
+          "name": "Google Calendar - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=- Use this tool when the user explicitly or implicitly requests drafting (e.g., \"Prepare a draft\").  \n- DEFAULT to the Draft tool if no explicit instruction is provided in the email body. \n- Use Andy as my name",
+        "resource": "draft",
+        "subject": "={{ $fromAI(\"emailSubject\",\"it is the email subject\") }}",
+        "message": "={{ $fromAI(\"emailBody\",\"it is the email message body\") }}",
+        "options": {
+          "sendTo": "={{ $fromAI(\"emailAddressReceipient\",\"it is the email address of recipient\") }}"
+        }
+      },
+      "id": "365eb458-a3e1-4684-979f-fc5a661713c6",
+      "name": "Draft Tool",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1260,
+        860
+      ],
+      "webhookId": "01a774ea-71dc-4a2f-9ce1-b9223f30c07c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9konQaB9iZTv7pz6",
+          "name": "Gmail - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "- Use this tool ONLY when the email body explicitly mentions replying to an email (e.g., \"Please reply to this email\").  \n- DEFAULT to the Draft tool if no specific instruction about replying is provided. ",
+        "operation": "reply",
+        "messageId": "={{ $json.query.threadId }}",
+        "emailType": "text",
+        "message": "={{ $fromAI(\"emailBody\",\"it is the email message body\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "8a84c357-c35c-4d40-ae6d-f350868b3600",
+      "name": "Reply Tool",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1380,
+        860
+      ],
+      "webhookId": "68f9e20c-a83c-4cc1-952e-467d6d8476ee",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9konQaB9iZTv7pz6",
+          "name": "Gmail - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "- Use this tool ONLY when the email body explicitly mentions sending an email (e.g. \"Please send this email to\") AND there is NO `threadId` provided.  \n- DEFAULT to the Draft tool if nothing is specified.",
+        "sendTo": "={{ $fromAI(\"emailAddressReceipient\",\"it is the email address of recipient\") }}",
+        "subject": "={{ $fromAI(\"emailSubject\",\"it is the email subject\") }}",
+        "emailType": "text",
+        "message": "={{ $fromAI(\"emailBody\",\"it is the email message body\") }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "a54123fc-74b6-45e6-b437-a63b18ddf3c2",
+      "name": "Send Tool",
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1500,
+        860
+      ],
+      "webhookId": "928f5a02-a550-403e-a9c0-c1452dbccd32",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "9konQaB9iZTv7pz6",
+          "name": "Gmail - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Sales\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "height": 286,
+        "width": 317,
+        "color": 4
+      },
+      "id": "b0175ca1-cc0e-4698-ad31-b38afe7f5652",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        380,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "name": "twilio_tool",
+        "description": "This is a Twilio tool that you can make a call or send sms through Twilio api, you should put the following body:\n{\n    \"to\": phone_number (phone country code should be included, it can be multi digi),\n    \"message\": message body,\n    \"type\": \"sms\" / \"call\"\n}\n",
+        "workflowId": {
+          "__rl": true,
+          "value": "9UniM4uGxr6Tt6TY",
+          "mode": "id"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        580,
+        860
+      ],
+      "id": "0823d7dd-f395-49d1-ade4-4061f7083483",
+      "name": "Twilio Tool"
+    },
+    {
+      "parameters": {
+        "content": "## Project Management",
+        "height": 266,
+        "width": 537,
+        "color": 3
+      },
+      "id": "817e6406-d78c-4d10-aa5e-5c772383f4a0",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        660,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "name": "go_high_level_crm_tool",
+        "description": "This is High Level CRM tool, you can do following methods:\n\n1. Get Opportunity\n{  \"type\": \"get_opportunity\" }\n\n2. Get Contact\n{  \"type\": \"get_contact\" }\n\n3. Get Create Contact\n{  \"type\": \"create_contact\", \"data\": { \"email\": \"john@gmail.com\",    \"phone\": \"1234567890\" }  }\n\n4. Create Opportunity\n{  \"type\": \"create_opportunity\",  \"data\": { \"name\": \"new business\", \"contact_id\": \"EJa382nMuzgCek0AP9ec\"  } }",
+        "workflowId": {
+          "__rl": true,
+          "value": "5qADWkPlZ2vKipNy",
+          "mode": "id"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        860
+      ],
+      "id": "7a67954f-1127-4808-9369-cfca150911ba",
+      "name": "Highlevel CRM Tool"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "4",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.2,
+      "position": [
+        1740,
+        420
+      ],
+      "id": "1c7e23af-938c-4fc0-b317-a55c94d5b849",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentURL": "={{ $fromAI(\"document_id\") }}",
+        "actionsUi": {
+          "actionFields": [
+            {
+              "action": "insert",
+              "text": "={{ $fromAI(\"body\") }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        960,
+        1180
+      ],
+      "id": "9d28994f-022b-463f-8f59-483565ab125e",
+      "name": "Google Docs Update",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "ucY9GKucP8lPLEX0",
+          "name": "Stanley Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "folderId": "GOOGLE_DRIVE_FOLDER_ID",
+        "title": "={{ $fromAI(\"title\") }}"
+      },
+      "type": "n8n-nodes-base.googleDocsTool",
+      "typeVersion": 2,
+      "position": [
+        780,
+        1180
+      ],
+      "id": "7ab37376-e140-4f85-83b0-a9906a045aae",
+      "name": "Google Docs Create",
+      "credentials": {
+        "googleDocsOAuth2Api": {
+          "id": "ucY9GKucP8lPLEX0",
+          "name": "Stanley Google Docs account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Use this tool to change the data and time of the event.",
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "andylo@proxa.cc",
+          "mode": "list",
+          "cachedResultName": "Meeting"
+        },
+        "eventId": "={{ $fromAI(\"eventId\",\"it is the event id of the calendar event\") }}",
+        "updateFields": {
+          "end": "={{ $fromAI(\"eventEndTime\",\"it is the meeting date ending time\") }}",
+          "start": "={{ $fromAI(\"eventStartTime\",\"it is the meeting date starting time\") }}"
+        }
+      },
+      "id": "88607516-ee45-4c4b-bb8d-e439344f243f",
+      "name": "Update Calendar Event",
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.2,
+      "position": [
+        1060,
+        860
+      ],
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "CoQzrf1SdD6Lgqgv",
+          "name": "Google Calendar - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "This bot help you to scrap all contact information for lead gen from google map. Input query \"q\" for search input, \"ll\" for latlng, \"page\" is for the current page. For \"ll\", please follow coordinates in this format: @latitude,longitude,zoom, for example: @40.6973709,-74.1444871,11z.",
+        "url": "https://google.serper.dev/maps",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "q"
+            },
+            {
+              "name": "ll"
+            },
+            {
+              "name": "page"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "X-API-KEY",
+              "valueProvider": "fieldValue",
+              "value": "SERPER_API_KEY"
+            }
+          ]
+        }
+      },
+      "id": "18454352-7990-4bcc-b58b-c83c667bf57c",
+      "name": "Map Searcher",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1820,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "This bot help you to search it from internet result perplexity, pass \"question\" as parameter for the searching question.",
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"model\": \"sonar\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"{question}\"\n    }\n  ]\n}"
+      },
+      "id": "909ff93b-7af7-4de3-ad41-57a53e1e003c",
+      "name": "Perplexity Search",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1960,
+        860
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YQt31pOrylWQ7F10",
+          "name": "Perplexity"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "This is a web crawler, you can input URL for scrapping the website content.",
+        "url": "https://scrape.serper.dev",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "url"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "X-API-KEY",
+              "valueProvider": "fieldValue",
+              "value": "SERPER_API_KEY"
+            }
+          ]
+        }
+      },
+      "id": "3426171d-1dc8-4e84-906d-7f00958e27ec",
+      "name": "Web Crawler",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1680,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Research \n",
+        "height": 286,
+        "width": 586,
+        "color": 3
+      },
+      "id": "20359499-36f5-4c22-8e42-20dcc6c31683",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1640,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Social Media\n\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "height": 286,
+        "width": 366,
+        "color": 6
+      },
+      "id": "b69e8793-f165-424e-881f-5731bb511c26",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        780
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "This is an image generator connected to Open AI Dall-E",
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n\"model\": \"dall-e-3\",\n\"prompt\": \"{prompt}\",\n\"n\": 1,\n\"size\": \"1024x1024\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        860
+      ],
+      "id": "c4206f46-4bfc-4f86-8dad-4453ea7bd1f7",
+      "name": "Dall E Image Generator",
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8UV",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Accounting & Finance",
+        "height": 266,
+        "width": 646,
+        "color": 7
+      },
+      "id": "5186c9e6-d298-4217-affd-db5428a0300e",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.messages[0].audio.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer FACEBOOK_TOKEN"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "6d82cf22-1012-4007-8e44-92da7a63c7f3",
+      "name": "Get audio binary1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        380,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "id": "58c57fe7-bee7-4e7b-813b-54600657209a",
+      "name": "Extract url from binary3",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        520,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer FACEBOOK_TOKEN"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8a2e9c4b-6e04-415d-8b84-bbe6af7159d2",
+      "name": "Download audio1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "=audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "13ac9ebb-b647-43f5-a790-b1ece51ac914",
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "13b0f80b-63ee-40b7-ac10-a9a3cea7d8da",
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "document",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "document"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "eec2be7c-0ecc-4a3a-8df2-2fe7fc361101",
+                    "leftValue": "={{ $json.messages[0].type }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        220,
+        280
+      ],
+      "id": "b2147248-1504-4c56-bfe8-c077b98450f7",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "id": "4a90d706-f54f-41f1-af10-c8bd6a94f055",
+      "name": "Extract url from binary4",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        520,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.messages[0].image.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer FACEBOOK_TOKEN"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "e4a7a940-9b52-4a48-8a9f-da312e87a418",
+      "name": "Get image binary1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        380,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer FACEBOOK_TOKEN"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a6bc952c-a6d3-4834-ada9-eec1f0b76a93",
+      "name": "Download image1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "text": "=Could you extract the following information from the invoice?\n\n{\n\"Entry Number\": \"\",\n\"Expense Date\": \"\",\n\"Vendor\": \"\",\n\"Expense Type\": \"\", (Housing, Transportation, Food, etc...)\n\"Expense Description\": \"\",\n\"Expense Amount\": \"\",\n\"Customer Name\": \"\",\n\"Reference#\": \"\"\n}\n\nreturn in JSON format, only return the JSON without other text.",
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        800,
+        220
+      ],
+      "id": "1f84de89-7328-4085-9021-a29d01e80410",
+      "name": "Image Analyser1",
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8UV",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "id": "34172f28-f600-4072-9d63-ff8ba50705e7",
+      "name": "Extract url from binary5",
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        520,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.messages[0].document.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer FACEBOOK_TOKEN"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "fc05dcd2-10a3-48d8-ab38-528b9c69b3a9",
+      "name": "Get document1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        380,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer FACEBOOK_TOKEN"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4f85cdd0-3781-47d1-ae80-1a0f71930106",
+      "name": "Download document1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        660,
+        380
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "options": {}
+      },
+      "id": "98fc8139-369e-4f2d-9987-54b173bb381d",
+      "name": "OpenAI7",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        800,
+        380
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8UV",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "operation": "create",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "name": "File Assistant",
+        "instructions": "You are a file assistant and will answer user question",
+        "knowledgeRetrieval": true,
+        "file_ids": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "f0c9da4c-8bb1-4cea-8eda-6af2ab70f211",
+      "name": "OpenAI8",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        940,
+        380
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8UV",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "assistant",
+        "assistantId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "prompt": "define",
+        "text": "=User is asking: {{ $('WhatsApp Trigger').first().json.messages[0].document.caption }}\n\nIf it is for invoice or bank statement, return a formatted data from this document.",
+        "options": {
+          "maxRetries": 20
+        }
+      },
+      "id": "d9d1e525-2188-45c6-85e4-f71475d9fab3",
+      "name": "OpenAI9",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        1080,
+        380
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8UV",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "71d98953-7fcd-492c-b764-8f6904a04863",
+      "name": "OpenAI Transcribe1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [
+        800,
+        60
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8UV",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8508117a-1872-4449-b6dc-d2e5a89a49bd",
+              "name": "chat_input",
+              "value": "={{ $('WhatsApp Trigger').first().json.messages[0].document.caption }}",
+              "type": "string"
+            },
+            {
+              "id": "a068a2e7-e21c-4a96-b9ff-a386605e6856",
+              "name": "data",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            },
+            {
+              "id": "47c59387-339a-4dde-ad04-10943140b6bb",
+              "name": "type",
+              "value": "document",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        380
+      ],
+      "id": "13f3f642-5eab-4bd9-8574-b76cb1005393",
+      "name": "Fields Mapper 3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8508117a-1872-4449-b6dc-d2e5a89a49bd",
+              "name": "data",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            },
+            {
+              "id": "7c5bffdc-6f59-406b-9906-8c164f5cdf19",
+              "name": "chat_input",
+              "value": "={{ $('WhatsApp Trigger').item.json.messages[0].image.caption }}",
+              "type": "string"
+            },
+            {
+              "id": "44069e57-8798-4007-9afb-6b111389653c",
+              "name": "type",
+              "value": "image",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        940,
+        220
+      ],
+      "id": "88282b06-f711-4a1e-879c-04ffa148a281",
+      "name": "Fields Mapper 2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8508117a-1872-4449-b6dc-d2e5a89a49bd",
+              "name": "chat_input",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "87ab94a3-55a3-4dc5-9daa-1d41ba0ec360",
+              "name": "type",
+              "value": "voice",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        940,
+        60
+      ],
+      "id": "73d4e84e-ea2c-4931-8e54-406167102e94",
+      "name": "Fields Mapper 1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8508117a-1872-4449-b6dc-d2e5a89a49bd",
+              "name": "chat_input",
+              "value": "={{ $json.messages[0].text.body }}",
+              "type": "string"
+            },
+            {
+              "id": "c739c469-d07c-48b1-9df2-ed5eb4266c8d",
+              "name": "type",
+              "value": "text",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        380,
+        560
+      ],
+      "id": "9cadde98-461f-4288-b8ff-55cd85b6392f",
+      "name": "Fields Mapper 4"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "={{ $('WhatsApp Trigger').first().json.metadata.phone_number_id }}",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').first().json.messages[0].from }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "id": "50248121-214f-4eb9-baaf-7b4c72c30a3a",
+      "name": "WhatsApp Business Cloud",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        1960,
+        60
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "jkKqddu9dJN4TDSX",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ]
+      },
+      "id": "c68e62d9-df74-477a-91b6-7db6ea8807fb",
+      "name": "WhatsApp Trigger",
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        60,
+        300
+      ],
+      "webhookId": "1a250de0-2013-4012-b645-d631cd4e1e29",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "4plC8wbJVDTMBBfz",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "GOOGLE_SHEET_URL",
+          "mode": "list",
+          "cachedResultName": "n8n test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_URL/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "invoice",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_URL/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Entry Number": "= {{ $fromAI(\"entry_number\") }}",
+            "Expense Date": "= {{ $fromAI(\"expenses_date\") }}",
+            "Expense Type": "= {{ $fromAI(\"expenses_type\") }}",
+            "Vendor": "= {{ $fromAI(\"vendor\") }}",
+            "Expense Description": "= {{ $fromAI(\"expense_description\") }}",
+            "Customer Name": "= {{ $fromAI(\"customer_name\") }}",
+            "Expense Amount": "= {{ $fromAI(\"expense_amount\") }}",
+            "Reference#": "= {{ $fromAI(\"reference\") }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Entry Number",
+              "displayName": "Entry Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Expense Date",
+              "displayName": "Expense Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Expense Type",
+              "displayName": "Expense Type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Vendor",
+              "displayName": "Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Expense Description",
+              "displayName": "Expense Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Expense Amount",
+              "displayName": "Expense Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Customer Name",
+              "displayName": "Customer Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Reference#",
+              "displayName": "Reference#",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "chat_input",
+              "displayName": "chat_input",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "data",
+              "displayName": "data",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "type",
+              "displayName": "type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        40,
+        1180
+      ],
+      "id": "7d688ad2-f5a7-423e-b2e4-bb37bbc387c5",
+      "name": "Invoice Google Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Otcg7vToMUrwIwzC",
+          "name": "Stanley Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Write bank statement data to Google Sheets with following format\n\n{\n    \"Transaction Date\": \"\", (use YYYY-MM-DD format)\n    \"Description\": \"\",\n    \"Vendor\": \"\",\n    \"Amount\": \"\",\n}\n\n",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "GOOGLE_SHEET_URL",
+          "mode": "list",
+          "cachedResultName": "n8n test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_URL/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 930183302,
+          "mode": "list",
+          "cachedResultName": "statement",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_URL/edit#gid=930183302"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Transaction Date",
+              "displayName": "Transaction Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Vendor",
+              "displayName": "Vendor",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        180,
+        1180
+      ],
+      "id": "382c09c4-be1c-469d-9564-38cb849262e7",
+      "name": "Bank Statement Google Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Otcg7vToMUrwIwzC",
+          "name": "Stanley Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "GOOGLE_SHEET_URL",
+          "mode": "list",
+          "cachedResultName": "n8n test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_URL/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "invoice",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_URL/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        340,
+        1180
+      ],
+      "id": "8fb5ff69-c3a4-4cb4-9bcb-b431291ae42a",
+      "name": "Read Invoice Google Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Otcg7vToMUrwIwzC",
+          "name": "Stanley Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "GOOGLE_SHEET_URL",
+          "mode": "list",
+          "cachedResultName": "n8n test",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_URL/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 930183302,
+          "mode": "list",
+          "cachedResultName": "statement",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/GOOGLE_SHEET_URL/edit#gid=930183302"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.5,
+      "position": [
+        500,
+        1180
+      ],
+      "id": "ff40d85f-cd71-4eab-a6f2-59bc17fbe98f",
+      "name": "Read Statement Google Sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Otcg7vToMUrwIwzC",
+          "name": "Stanley Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## The Only Personal AI Agent You Need",
+        "height": 760,
+        "width": 660
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        0
+      ],
+      "id": "b158d5c0-a78b-46cc-b68c-183aa7d47039",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Legal ",
+        "height": 266,
+        "width": 497,
+        "color": 4
+      },
+      "id": "f550bd8e-d11d-4e8a-b4db-25d67d3f951a",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1220,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "This is a legal reasoning tool, use it for understanding and answering legal question, for example, NDA and contract.",
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"model\": \"deepseek-r1-distill-llama-70b\",\n\"messages\": [{\n    \"role\": \"user\",\n    \"content\": \"You are an AI assistant responding to legal inquiries. Follow these strict guidelines to ensure accuracy, compliance, and clarity, user question: {question}\"\n}]\n}",
+        "optimizeResponse": true,
+        "dataField": "choices"
+      },
+      "id": "23580221-6efa-43a7-a18a-f874c65df551",
+      "name": "Deepseek Legal Reasoning Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1420,
+        1180
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nSZOMNcdWKOj889r",
+          "name": "Stanley Groq"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Content ",
+        "height": 266,
+        "width": 477,
+        "color": 6
+      },
+      "id": "465024f1-e017-4eed-8d2a-272adfe08022",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1740,
+        1100
+      ]
+    },
+    {
+      "parameters": {
+        "toolDescription": "This is a Content reasoning tool, use it for understanding and drafting content",
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n\"model\": \"deepseek-r1-distill-llama-70b\",\n\"messages\": [\n  {\n    \"role\": \"system\",\n    \"content\": \"You are an AI Content Manager, an expert in content strategy, blog writing, and social media marketing. Your goal is to generate engaging, high-quality, and SEO-friendly content that aligns with my brand and target audience.\\nResponsibilities:\\nContent Ideation & Research\\nGenerate trending topics related to my niche (AI, automation, SaaS, content creation, etc.).\\nAnalyze audience interests and suggest high-engagement content ideas.\\nEnsure topics align with SEO best practices.\\nWriting & Optimization\\nCreate well-structured blog posts, LinkedIn articles, Twitter threads, and Instagram captions.\\nOptimize content for readability, engagement, and conversion.\\nMaintain a conversational yet professional tone based on the platform.\\nSEO & Formatting\\nInclude relevant keywords without keyword stuffing.\\nAdd proper headings (H1, H2, H3) and bullet points for clarity.\\nSuggest relevant hashtags and metadata for social media posts.\\nCall-to-Action (CTA) & Engagement\\nEnsure every piece of content has a clear CTA (e.g., subscribe, join the community, download a resource).\\nSuggest interactive elements like polls, questions, or engagement-driven hooks.\\nContent Repurposing\\nConvert blog posts into Twitter threads, LinkedIn posts, or short-form videos.\\nSummarize key points from long-form content for bite-sized social posts.\\nYour Writing Style Should Be:\\nClear & Concise: Easy to read and understand.\\nConversational & Engaging: Hook the reader early, keep them engaged.\\nActionable & Value-Driven: Provide useful insights or solutions.\\nOn-Brand & Cohesive: Maintain consistency in messaging across platforms.\\nExamples of Tasks You Will Handle:\\nBlog Post – Write a 1,500-word blog post on “How AI Can Automate Content Creation.”\\nTwitter Thread – Summarize key takeaways from the blog post into a 10-tweet thread.\\nLinkedIn Post – Create an engaging thought leadership post about AI’s impact on marketing.\\nInstagram Caption – Craft a short, engaging caption for a carousel post on AI productivity tools.\"\n  },\n  {\n    \"role\": \"user\",\n    \"content\": \"You are an AI assistant providing quality content. Follow these strict guidelines to ensure accuracy, compliance, and clarity, user question: {question}\"\n  }\n]\n}",
+        "optimizeResponse": true,
+        "dataField": "choices"
+      },
+      "id": "7d3c1f4f-3d3a-4893-8f8a-7d58bb7a16ad",
+      "name": "Deepseek Content Writing Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1940,
+        1180
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "nSZOMNcdWKOj889r",
+          "name": "Stanley Groq"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toolDescription": "This bot help you to search youtube video by input",
+        "url": "https://youtube.googleapis.com/youtube/v3/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "q"
+            },
+            {
+              "name": "order",
+              "valueProvider": "fieldValue",
+              "value": "date"
+            },
+            {
+              "name": "relevanceLanguage",
+              "valueProvider": "fieldValue",
+              "value": "en"
+            },
+            {
+              "name": "regionCode",
+              "valueProvider": "fieldValue",
+              "value": "US"
+            }
+          ]
+        }
+      },
+      "id": "b4074322-4521-4fcb-8d55-063031b5922c",
+      "name": "Youtube Search",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        2100,
+        860
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YQt31pOrylWQ7F10",
+          "name": "Perplexity"
+        },
+        "httpQueryAuth": {
+          "id": "QeWWgvTwTnDtbVMw",
+          "name": "andylo@proxa.cc GCP Youtube"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Calendar",
+        "height": 280,
+        "width": 460,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        720,
+        780
+      ],
+      "id": "0a7f7272-5c33-4482-9fc2-f33fd1d36b13",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "name": "social_media_post",
+        "description": "This is a social media posting tool",
+        "workflowId": {
+          "__rl": true,
+          "value": "QblDrYaTwX7HXgeF",
+          "mode": "id"
+        },
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n  \"platform\": \"X/Linkedin/Facebook\",\n  \"title\": \"Hello this is a testing title.\",\n  \"content\": \"Hello this is a testing.\",\n  \"graphic\": \"\",\n  \"type\": \"text\"\n}"
+      },
+      "id": "9b5eee0a-2117-417f-9523-160f79fae6dd",
+      "name": "Social Media Tool",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        60,
+        860
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Email",
+        "height": 280,
+        "width": 420
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        780
+      ],
+      "id": "77814a9a-93fd-42d1-804f-657fc79a6a96",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This is a message with {{ $json.type }}\n\nHere's the user chat input:\n{{ $json.chat_input }}\n\nOther data:\n{{ $json.data }}",
+        "options": {
+          "systemMessage": "=# Overview\nYou are a personal AI assistant and your name is Donna that can use following tool to complete user's request\n\n## Available Tools\nCommunicatio\n- Twilio Call\n- Twilio send SMS\n- Google Calendar create event\n- Google Calendar delete event\n- Google Calendar update event\n- Slack send message\n- Gmail draft email\n- Gmail reply email\n- Gmail send email\n- Highlevel CRM get opportunity\n- Highlevel CRM create opportunity\n- Highlevel CRM get contant\n- Highlevel CRM create contact\n- Social media tool (Facebook, X, Instagram, Linkedin) \n- Dall E Image geenrator\n- Google doc create\n- Google doc update\n- Web crawler\n- Map searcher\n- Perplexity search\n- Youtube search\n- Google sheet append for invoice\n- Google sheet append for bank statement\n- Google sheet read for invoice\n- Google sheet read for bank statement\n- Deepseek Content Writing Tool\n- Deepseek Legal Reasoning Tool\n\n## Remark\n1. If you need to plan anything like project planning or trip itienary, use research tool from the internet to get the correct information.\n2. Use Deepseek Legal Reasoning Tool for any legal question, like NDA, Contract, etc\n3. Use Deepseek Content Writing Tool for any content writing\n4. Use social media tool to post anything to x (twitter), linkedin or facebook"
+        }
+      },
+      "id": "0b9e7dda-b787-4141-b96b-f4b1dbd8abdc",
+      "name": "Donna AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1620,
+        60
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Calendar Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Creating Calendar Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Draft Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Twilio Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Highlevel CRM Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs Update": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Docs Create": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Calendar Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Searcher": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Web Crawler": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Dall E Image Generator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get audio binary1": {
+      "main": [
+        [
+          {
+            "node": "Extract url from binary3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract url from binary3": {
+      "main": [
+        [
+          {
+            "node": "Download audio1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download audio1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Transcribe1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Get audio binary1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get image binary1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get document1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fields Mapper 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract url from binary4": {
+      "main": [
+        [
+          {
+            "node": "Download image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get image binary1": {
+      "main": [
+        [
+          {
+            "node": "Extract url from binary4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download image1": {
+      "main": [
+        [
+          {
+            "node": "Image Analyser1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Analyser1": {
+      "main": [
+        [
+          {
+            "node": "Fields Mapper 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract url from binary5": {
+      "main": [
+        [
+          {
+            "node": "Download document1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get document1": {
+      "main": [
+        [
+          {
+            "node": "Extract url from binary5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download document1": {
+      "main": [
+        [
+          {
+            "node": "OpenAI7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI7": {
+      "main": [
+        [
+          {
+            "node": "OpenAI8",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI8": {
+      "main": [
+        [
+          {
+            "node": "OpenAI9",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI9": {
+      "main": [
+        [
+          {
+            "node": "Fields Mapper 3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Transcribe1": {
+      "main": [
+        [
+          {
+            "node": "Fields Mapper 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fields Mapper 3": {
+      "main": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fields Mapper 2": {
+      "main": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fields Mapper 1": {
+      "main": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fields Mapper 4": {
+      "main": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Invoice Google Sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bank Statement Google Sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Invoice Google Sheet": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Statement Google Sheet1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deepseek Legal Reasoning Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deepseek Content Writing Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Youtube Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Social Media Tool": {
+      "ai_tool": [
+        [
+          {
+            "node": "Donna AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Donna AI Agent": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "82513d7e-0ebf-4d75-8dc5-2c8f5f4c1c71",
+  "meta": {
+    "instanceId": "4221cc7208f142ff91856b22776eec81b71c256154ec8030569832c22d0c66d9"
+  },
+  "id": "7V0nEpaQSM7oFQgO",
+  "tags": []
+}

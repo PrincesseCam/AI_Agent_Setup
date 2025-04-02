@@ -1,0 +1,55 @@
+{
+  "output": [
+    {
+      "description": "Exploring the potential and impact of quantum computers on technology",
+      "topic": "The Rise of Quantum Computing"
+    },
+    {
+      "description": "How virtual reality has evolved beyond gaming and its future applications",
+      "topic": "The Evolution of VR: From Gaming to Reality"
+    },
+    {
+      "description": "Discussing the ethical implications of artificial intelligence in our lives",
+      "topic": "AI Ethics in Modern Society"
+    },
+    {
+      "description": "The importance of cybersecurity as more devices connect to the internet",
+      "topic": "Cybersecurity in an IoT World"
+    },
+    {
+      "description": "How electric and autonomous cars are changing transportation",
+      "topic": "Revolutionizing Transportation: Electric and Autonomous Cars"
+    }
+  ],
+  "selectedTopic": {
+    "description": "Exploring the potential and impact of quantum computers on technology",
+    "topic": "The Rise of Quantum Computing"
+  },
+  "allTopics": [
+    {
+      "description": "Exploring the potential and impact of quantum computers on technology",
+      "topic": "The Rise of Quantum Computing"
+    },
+    {
+      "description": "How virtual reality has evolved beyond gaming and its future applications",
+      "topic": "The Evolution of VR: From Gaming to Reality"
+    },
+    {
+      "description": "Discussing the ethical implications of artificial intelligence in our lives",
+      "topic": "AI Ethics in Modern Society"
+    },
+    {
+      "description": "The importance of cybersecurity as more devices connect to the internet",
+      "topic": "Cybersecurity in an IoT World"
+    },
+    {
+      "description": "How electric and autonomous cars are changing transportation",
+      "topic": "Revolutionizing Transportation: Electric and Autonomous Cars"
+    }
+  ],
+  "workflowData": {
+    "topic": "The Rise of Quantum Computing",
+    "topicDescription": "Exploring the potential and impact of quantum computers on technology",
+    "publishSettings": {}
+  }
+}

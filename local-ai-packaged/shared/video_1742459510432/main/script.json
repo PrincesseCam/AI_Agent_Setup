@@ -1,0 +1,69 @@
+{
+  "output": {
+    "sections": [
+      {
+        "section_name": "intro",
+        "content": "The script introduction goes here.",
+        "visual_prompt": "A visually engaging background with the title 'Quantum Computing & Cybersecurity'. Below, a brief animation of a digital circuitry or quantum bits (qubits) entangled in motion to capture attention."
+      },
+      {
+        "section_name": "main_1",
+        "content": "The first main point of the script goes here.",
+        "visual_prompt": "A close-up shot of a computer screen displaying a cybersecurity symbol. Above it, an image explaining basic concepts of quantum computing and its potential impact on traditional cybersecurity."
+      },
+      {
+        "section_name": "main_2",
+        "content": "The second main point of the script goes here.",
+        "visual_prompt": "A sequence showing a hacker trying to break into a network. Then, transition to a visual representing qubits breaking through classical security protocols, symbolizing quantum computing's impact on cybersecurity."
+      },
+      {
+        "section_name": "conclusion",
+        "content": "The script conclusion goes here.",
+        "visual_prompt": "A final slide with the title 'What's Next?' and an image or diagram showing how organizations are adapting to quantum-resistant algorithms. Encourage viewers to stay informed about advancements in cybersecurity."
+      }
+    ],
+    "hashtags": [
+      "#QuantumComputing",
+      "#Cybersecurity",
+      "#QuantumTech"
+    ]
+  },
+  "scriptData": {
+    "output": {
+      "sections": [
+        {
+          "section_name": "intro",
+          "content": "The script introduction goes here.",
+          "visual_prompt": "A visually engaging background with the title 'Quantum Computing & Cybersecurity'. Below, a brief animation of a digital circuitry or quantum bits (qubits) entangled in motion to capture attention."
+        },
+        {
+          "section_name": "main_1",
+          "content": "The first main point of the script goes here.",
+          "visual_prompt": "A close-up shot of a computer screen displaying a cybersecurity symbol. Above it, an image explaining basic concepts of quantum computing and its potential impact on traditional cybersecurity."
+        },
+        {
+          "section_name": "main_2",
+          "content": "The second main point of the script goes here.",
+          "visual_prompt": "A sequence showing a hacker trying to break into a network. Then, transition to a visual representing qubits breaking through classical security protocols, symbolizing quantum computing's impact on cybersecurity."
+        },
+        {
+          "section_name": "conclusion",
+          "content": "The script conclusion goes here.",
+          "visual_prompt": "A final slide with the title 'What's Next?' and an image or diagram showing how organizations are adapting to quantum-resistant algorithms. Encourage viewers to stay informed about advancements in cybersecurity."
+        }
+      ],
+      "hashtags": [
+        "#QuantumComputing",
+        "#Cybersecurity",
+        "#QuantumTech"
+      ]
+    }
+  },
+  "directories": {
+    "main": "/data/shared/undefined/main",
+    "audio": "/data/shared/undefined/audio",
+    "images": "/data/shared/undefined/images",
+    "video": "/data/shared/undefined/video",
+    "final": "/data/shared/undefined/final"
+  }
+}

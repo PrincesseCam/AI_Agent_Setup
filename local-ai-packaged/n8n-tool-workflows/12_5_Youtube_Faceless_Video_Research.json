@@ -1,0 +1,1416 @@
+{
+  "name": "12.5 Youtube Faceless Video Research",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+          "mode": "list",
+          "cachedResultName": "Faceless Youtube Idea Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1258965527,
+          "mode": "list",
+          "cachedResultName": "AI Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxx/edit#gid=1258965527"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "video id": "={{ $('Loop Over Items1').item.json['video id'] }}"
+          },
+          "matchingColumns": [
+            "video id"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "video id",
+              "displayName": "video id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Url",
+              "displayName": "Url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Channel Name",
+              "displayName": "Channel Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Publish Time",
+              "displayName": "Publish Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250204",
+              "displayName": "20250204",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250205",
+              "displayName": "20250205",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250206",
+              "displayName": "20250206",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250207",
+              "displayName": "20250207",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250208",
+              "displayName": "20250208",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250209",
+              "displayName": "20250209",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250210",
+              "displayName": "20250210",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250211",
+              "displayName": "20250211",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250212",
+              "displayName": "20250212",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250213",
+              "displayName": "20250213",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250214",
+              "displayName": "20250214",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250215",
+              "displayName": "20250215",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250216",
+              "displayName": "20250216",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250217",
+              "displayName": "20250217",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250218",
+              "displayName": "20250218",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250219",
+              "displayName": "20250219",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250220",
+              "displayName": "20250220",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250221",
+              "displayName": "20250221",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250222",
+              "displayName": "20250222",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250223",
+              "displayName": "20250223",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250224",
+              "displayName": "20250224",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250225",
+              "displayName": "20250225",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250226",
+              "displayName": "20250226",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250227",
+              "displayName": "20250227",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250228",
+              "displayName": "20250228",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250301",
+              "displayName": "20250301",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250302",
+              "displayName": "20250302",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250303",
+              "displayName": "20250303",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250304",
+              "displayName": "20250304",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "20250305",
+              "displayName": "20250305",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d24a1ed2-50da-49dd-84d5-98fe0e96016d",
+      "name": "Google Sheets2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2160,
+        -140
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DqEJMNtcMACLlnZ7",
+          "name": "Google Sheets - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://youtube.googleapis.com/youtube/v3/videos",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "part",
+              "value": "snippet,statistics"
+            },
+            {
+              "name": "id",
+              "value": "={{ $json['video id'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "13d23ce0-a504-4a21-824f-6dcd58388dd6",
+      "name": "Fetch Video Details1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        1600,
+        -140
+      ],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "QeWWgvTwTnDtbVMw",
+          "name": "andylo@proxa.cc GCP Youtube"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "id": "36e6204a-4835-49a2-a9ad-305f809cd455",
+      "name": "Split Out1",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        -140
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2bcbeff7-525b-498a-88d9-b38d3713ffdd",
+              "name": "={{ $now.toFormat('yyyyMMdd') }}",
+              "value": "={{ $json.statistics.viewCount }}",
+              "type": "string"
+            },
+            {
+              "id": "7e15d8c1-d25f-4536-955f-0f36517be352",
+              "name": "video id",
+              "value": "={{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2f4b35d7-4e95-4d86-b2c2-705c063553ad",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1980,
+        -140
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "b826b4ee-0e1e-4e55-a3a4-ce83d81a7b11",
+      "name": "Wait1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2340,
+        -140
+      ],
+      "webhookId": "223f671e-93d7-4380-aa1e-5431c2a25f5b"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "869187f2-4366-4f38-bcf2-52d85d46e3bd",
+              "leftValue": "={{ $json.nextPageToken }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1800,
+        -720
+      ],
+      "id": "e29ab3cd-eb30-4e21-9f32-03cb3f954c25",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2020,
+        -720
+      ],
+      "id": "9a2a6e99-9b7d-42f2-9e9a-d423efe5e0a0",
+      "name": "Wait3",
+      "webhookId": "e0856d3f-b28c-4f2d-8d7b-8f9d25e7c630"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "items",
+        "options": {}
+      },
+      "id": "8b055bec-1a46-4090-b422-7513dd0557f4",
+      "name": "Split Out3",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1800,
+        -560
+      ]
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "video id",
+              "renameField": true,
+              "outputFieldName": "existing_video_ids"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        1420,
+        -640
+      ],
+      "id": "1ddf47ff-76a7-4a13-b949-4fab0cc615bf",
+      "name": "Aggregate Existing Videos",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c71626d9-ec6b-4b4b-a144-72d7f378cbe6",
+              "name": "video id",
+              "value": "={{ $json['video id'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1240,
+        -640
+      ],
+      "id": "e09380ac-e63d-48b1-8479-d1b6f369ce70",
+      "name": "Get Video Id Field",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+          "mode": "list",
+          "cachedResultName": "Faceless Youtube Idea Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1258965527,
+          "mode": "list",
+          "cachedResultName": "AI Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxx/edit#gid=1258965527"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1060,
+        -640
+      ],
+      "id": "69e4c7ca-ff8b-4de6-b76f-8af7fd44b4b1",
+      "name": "Load Existing Video Id",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DqEJMNtcMACLlnZ7",
+          "name": "Google Sheets - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+          "mode": "list",
+          "cachedResultName": "Faceless Youtube Idea Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1258965527,
+          "mode": "list",
+          "cachedResultName": "AI Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxx/edit#gid=1258965527"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Publish Time": "={{ $json.snippet.publishedAt }}",
+            "Channel Name": "={{ $json.snippet.channelTitle }}",
+            "Url": "={{ 'https://youtube.com/watch?v=' + $json.id.videoId }}",
+            "Title": "={{ $json.snippet.title }}",
+            "video id": "={{ $json.id.videoId }}"
+          },
+          "matchingColumns": [
+            "video id"
+          ],
+          "schema": [
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "video id",
+              "displayName": "video id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Url",
+              "displayName": "Url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Channel Name",
+              "displayName": "Channel Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Publish Time",
+              "displayName": "Publish Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "20250213",
+              "displayName": "20250213",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250214",
+              "displayName": "20250214",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250215",
+              "displayName": "20250215",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250216",
+              "displayName": "20250216",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250217",
+              "displayName": "20250217",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250218",
+              "displayName": "20250218",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250219",
+              "displayName": "20250219",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250220",
+              "displayName": "20250220",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250221",
+              "displayName": "20250221",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250222",
+              "displayName": "20250222",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250223",
+              "displayName": "20250223",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250224",
+              "displayName": "20250224",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250225",
+              "displayName": "20250225",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250226",
+              "displayName": "20250226",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250227",
+              "displayName": "20250227",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250228",
+              "displayName": "20250228",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250301",
+              "displayName": "20250301",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250302",
+              "displayName": "20250302",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250303",
+              "displayName": "20250303",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250304",
+              "displayName": "20250304",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "20250305",
+              "displayName": "20250305",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5a4b21da-7207-4025-9dbd-78019fe80538",
+      "name": "Save Data2",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2240,
+        -560
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DqEJMNtcMACLlnZ7",
+          "name": "Google Sheets - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bea4a226-9b25-4ada-a068-98406d5e1c31",
+              "leftValue": "={{ $('Aggregate Existing Videos').item.json.existing_video_ids }}",
+              "rightValue": "={{ $json.id.videoId }}",
+              "operator": {
+                "type": "array",
+                "operation": "notContains",
+                "rightType": "any"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        2020,
+        -560
+      ],
+      "id": "13cb9cd9-3f9f-4305-8498-98cd805e2502",
+      "name": "Filter Out Existing"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxxxxxxxxxxxxxxxxxxxxxx",
+          "mode": "list",
+          "cachedResultName": "Faceless Youtube Idea Search",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1258965527,
+          "mode": "list",
+          "cachedResultName": "AI Agent",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxxxxxxxxxxxxxxxxxxxxxx/edit#gid=1258965527"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1060,
+        -220
+      ],
+      "id": "f950f769-f18c-4591-b146-66f90a8655e6",
+      "name": "Load Existing Video Id1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "DqEJMNtcMACLlnZ7",
+          "name": "Google Sheets - andylo@proxa.cc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c71626d9-ec6b-4b4b-a144-72d7f378cbe6",
+              "name": "video id",
+              "value": "={{ $json['video id'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1240,
+        -220
+      ],
+      "id": "12e0517c-1547-49e0-9b9c-38af95f1ae9f",
+      "name": "Get Video Id Field1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "id": "376cbcde-0d66-4aa3-9348-81a92cefbe96",
+      "name": "Loop Over Items1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1420,
+        -220
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Search on the latest video from by topic\n\nRemember to update \"Fetch Videos Page\" > \"q\" for your topic ",
+        "height": 440,
+        "width": 1687.4306233387563,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        860,
+        -820
+      ],
+      "id": "da34b1f4-6e09-47ed-b16c-1b91b4576dff",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "=https://youtube.googleapis.com/youtube/v3/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "=Bedtime Stories"
+            },
+            {
+              "name": "publishedAfter",
+              "value": "={{ $now.format('yyyy-MM-dd').toDateTime().minus(1, 'day').format('yyyy-MM-dd') + \"T00:00:00Z\" }}"
+            },
+            {
+              "name": "order",
+              "value": "date"
+            },
+            {
+              "name": "type",
+              "value": "video"
+            },
+            {
+              "name": "part",
+              "value": "snippet"
+            },
+            {
+              "name": "relevanceLanguage",
+              "value": "en"
+            },
+            {
+              "name": "videoDuration",
+              "value": "long"
+            },
+            {
+              "name": "regionCode",
+              "value": "US"
+            },
+            {
+              "name": "maxResults",
+              "value": "50"
+            },
+            {
+              "name": "pageToken",
+              "value": "={{ $json?.nextPageToken || '' }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "57a027b7-14d3-44a0-a2e3-36c6f872ef91",
+      "name": "Fetch Videos Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1600,
+        -640
+      ],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "QeWWgvTwTnDtbVMw",
+          "name": "andylo@proxa.cc GCP Youtube"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Fetch Daily Video Count\n",
+        "height": 440,
+        "width": 1684.3908166719782,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        860,
+        -340
+      ],
+      "id": "c54674eb-70df-496b-857a-0be3a831f901",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        900,
+        -640
+      ],
+      "id": "f2e711c9-cf7e-4335-82c2-23f1e97721cd",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        880,
+        -220
+      ],
+      "id": "9dbe6516-c0f7-47c9-b068-9dc32d363d64",
+      "name": "Schedule Trigger1"
+    },
+    {
+      "parameters": {},
+      "id": "3a31899a-a773-4021-b413-55dd289de217",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        940,
+        100
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Sheets2": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Video Details1": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out3": {
+      "main": [
+        [
+          {
+            "node": "Filter Out Existing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Existing Videos": {
+      "main": [
+        [
+          {
+            "node": "Fetch Videos Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Id Field": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Existing Videos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Existing Video Id": {
+      "main": [
+        [
+          {
+            "node": "Get Video Id Field",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Out Existing": {
+      "main": [
+        [
+          {
+            "node": "Save Data2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Fetch Videos Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load Existing Video Id1": {
+      "main": [
+        [
+          {
+            "node": "Get Video Id Field1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video Id Field1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fetch Video Details1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Videos Page": {
+      "main": [
+        [
+          {
+            "node": "Split Out3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Load Existing Video Id",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Load Existing Video Id1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "25cc5761-c7ea-491b-9186-0e999d10ae07",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4221cc7208f142ff91856b22776eec81b71c256154ec8030569832c22d0c66d9"
+  },
+  "id": "BPdCkdRpdlK93Q1W",
+  "tags": []
+}

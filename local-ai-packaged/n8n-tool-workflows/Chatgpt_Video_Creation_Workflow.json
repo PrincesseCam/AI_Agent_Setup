@@ -1,0 +1,262 @@
+{
+    "name": "Automated Video Generation Workflow",
+    "nodes": [
+      {
+        "id": "Cron_Start",
+        "name": "Start Cron",
+        "type": "n8n-nodes-base.cron",
+        "typeVersion": 1,
+        "position": [
+          250,
+          300
+        ],
+        "parameters": {
+          "triggerTimes": {
+            "item": [
+              {
+                "hour": 9,
+                "minute": 0
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "Ollama_Script",
+        "name": "Generate Script (Ollama)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2,
+        "position": [
+          500,
+          300
+        ],
+        "parameters": {
+          "authentication": "none",
+          "url": "http://YOUR_OLLAMA_HOST:YOUR_PORT/generate",
+          "method": "POST",
+          "responseFormat": "json",
+          "jsonParameters": true,
+          "options": {},
+          "bodyParametersJson": "{\n  \"prompt\": \"Generate a short script about [YOUR_TOPIC].\",\n  \"model\": \"llama2-7b\",\n  \"temperature\": 0.7\n}"
+        }
+      },
+      {
+        "id": "ElevenLabs_TTS",
+        "name": "Convert to Speech (ElevenLabs)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2,
+        "position": [
+          750,
+          300
+        ],
+        "parameters": {
+          "authentication": "none",
+          "url": "https://api.elevenlabs.io/v1/text-to-speech/YOUR_VOICE_ID",
+          "method": "POST",
+          "responseFormat": "file",
+          "jsonParameters": true,
+          "options": {
+            "bodyContentType": "json"
+          },
+          "bodyParametersJson": "{\n  \"text\": \"={{$json[\"choices\"][0][\"text\"] || $json[\"data\"] || \"No text found\"}}\",\n  \"voice_settings\": {\n    \"stability\": 0.5,\n    \"similarity_boost\": 0.5\n  }\n}",
+          "headerParametersJson": "{\n  \"xi-api-key\": \"YOUR_ELEVENLABS_API_KEY\"\n}"
+        }
+      },
+      {
+        "id": "StableDiffusion_Generate",
+        "name": "Generate Image (Stable Diffusion)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2,
+        "position": [
+          1000,
+          300
+        ],
+        "parameters": {
+          "authentication": "none",
+          "url": "http://YOUR_AUTOMATIC1111_HOST:YOUR_PORT/sdapi/v1/txt2img",
+          "method": "POST",
+          "responseFormat": "json",
+          "jsonParameters": true,
+          "bodyParametersJson": "{\n  \"prompt\": \"An illustration matching the content of the script.\",\n  \"steps\": 20,\n  \"cfg_scale\": 7,\n  \"width\": 512,\n  \"height\": 512\n}"
+        }
+      },
+      {
+        "id": "FFmpeg_Combine",
+        "name": "Combine Media (FFmpeg)",
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [
+          1250,
+          300
+        ],
+        "parameters": {
+          "command": "docker",
+          "arguments": "exec YOUR_FFMPEG_CONTAINER_NAME ffmpeg -y -loop 1 -framerate 1 -t 10 -i /path/to/generated_image.png -i /path/to/tts_audio.mp3 -c:v libx264 -c:a aac -pix_fmt yuv420p /path/to/output/final_video.mp4",
+          "options": {}
+        }
+      },
+      {
+        "id": "YouTube_Upload",
+        "name": "Upload to YouTube",
+        "type": "n8n-nodes-base.youtube",
+        "typeVersion": 1,
+        "position": [
+          1500,
+          300
+        ],
+        "parameters": {
+          "resource": "video",
+          "operation": "upload",
+          "videoFields": {
+            "title": "Automated Video",
+            "description": "Uploaded via n8n",
+            "tags": ["n8n", "automation"],
+            "privacyStatus": "private"
+          },
+          "fileLocation": "/path/to/output/final_video.mp4"
+        },
+        "credentials": {
+          "youTubeOAuth2Api": "YOUR_YOUTUBE_CREDENTIAL_NAME"
+        }
+      },
+      {
+        "id": "Instagram_Upload",
+        "name": "Upload to Instagram",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2,
+        "position": [
+          1750,
+          150
+        ],
+        "parameters": {
+          "authentication": "none",
+          "url": "https://graph.facebook.com/v16.0/YOUR_IG_CONTAINER_ID/media",
+          "method": "POST",
+          "responseFormat": "json",
+          "jsonParameters": true,
+          "bodyParametersJson": "{\n  \"video_url\": \"https://YOUR_HOST/path/to/final_video.mp4\",\n  \"caption\": \"Automated post via n8n\"\n}",
+          "queryParametersJson": "{\n  \"access_token\": \"YOUR_IG_LONG_LIVED_ACCESS_TOKEN\"\n}"
+        }
+      },
+      {
+        "id": "TikTok_Upload",
+        "name": "Upload to TikTok",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2,
+        "position": [
+          1750,
+          300
+        ],
+        "parameters": {
+          "authentication": "none",
+          "url": "https://open-api.tiktok.com/...",
+          "method": "POST",
+          "responseFormat": "json",
+          "jsonParameters": true,
+          "bodyParametersJson": "{\n  \"YOUR_TIKTOK_PAYLOAD\": \"...\"\n}",
+          "queryParametersJson": "{\n  \"access_token\": \"YOUR_TIKTOK_ACCESS_TOKEN\"\n}"
+        }
+      },
+      {
+        "id": "Facebook_Upload",
+        "name": "Upload to Facebook",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 2,
+        "position": [
+          1750,
+          450
+        ],
+        "parameters": {
+          "authentication": "none",
+          "url": "https://graph-video.facebook.com/v16.0/YOUR_PAGE_ID/videos",
+          "method": "POST",
+          "responseFormat": "json",
+          "jsonParameters": true,
+          "bodyParametersJson": "{\n  \"file_url\": \"https://YOUR_HOST/path/to/final_video.mp4\",\n  \"description\": \"Automated Facebook post via n8n\"\n}",
+          "queryParametersJson": "{\n  \"access_token\": \"YOUR_FACEBOOK_PAGE_ACCESS_TOKEN\"\n}"
+        }
+      }
+    ],
+    "connections": {
+      "Start Cron": {
+        "main": [
+          [
+            {
+              "node": "Generate Script (Ollama)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Script (Ollama)": {
+        "main": [
+          [
+            {
+              "node": "Convert to Speech (ElevenLabs)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Convert to Speech (ElevenLabs)": {
+        "main": [
+          [
+            {
+              "node": "Generate Image (Stable Diffusion)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Generate Image (Stable Diffusion)": {
+        "main": [
+          [
+            {
+              "node": "Combine Media (FFmpeg)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Combine Media (FFmpeg)": {
+        "main": [
+          [
+            {
+              "node": "Upload to YouTube",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Upload to YouTube": {
+        "main": [
+          [
+            {
+              "node": "Upload to Instagram",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Upload to TikTok",
+              "type": "main",
+              "index": 0
+            },
+            {
+              "node": "Upload to Facebook",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "active": false,
+    "settings": {},
+    "id": "1"
+  }
+  

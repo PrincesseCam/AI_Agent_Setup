@@ -1,0 +1,21 @@
+{
+  "output": {
+    "title": "Quantum Computing: The Future is Here!",
+    "script": "In a world where technology is pushing the boundaries of what's possible, one field is making waves like never before - quantum computing. It's not just science fiction; it's real, and it's here to stay! From breaking codes to revolutionizing AI, quantum computers are set to transform our tech landscape. Get ready to dive into the fascinating world of quantum computing and see how it could change everything! Don't miss this mind-blowing journey!",
+    "call_to_action": "Subscribe now for more in-depth looks at the future of technology!"
+  },
+  "scriptData": {
+    "output": {
+      "title": "Quantum Computing: The Future is Here!",
+      "script": "In a world where technology is pushing the boundaries of what's possible, one field is making waves like never before - quantum computing. It's not just science fiction; it's real, and it's here to stay! From breaking codes to revolutionizing AI, quantum computers are set to transform our tech landscape. Get ready to dive into the fascinating world of quantum computing and see how it could change everything! Don't miss this mind-blowing journey!",
+      "call_to_action": "Subscribe now for more in-depth looks at the future of technology!"
+    }
+  },
+  "directories": {
+    "main": "/data/shared/undefined/main",
+    "audio": "/data/shared/undefined/audio",
+    "images": "/data/shared/undefined/images",
+    "video": "/data/shared/undefined/video",
+    "final": "/data/shared/undefined/final"
+  }
+}

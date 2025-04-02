@@ -1,0 +1,30 @@
+{
+  "platformContent": {
+    "youtube": {
+      "title": "Video Content",
+      "description": "Video Content\n\n\n\nLike and subscribe!\n\n#content #video",
+      "tags": [
+        "content",
+        "video"
+      ]
+    },
+    "instagram": {
+      "caption": "✨ Video Content ✨\n\nLike and subscribe!\n\n#content #video"
+    },
+    "tiktok": {
+      "caption": "✨ Video Content ✨\n\nLike and subscribe!\n\n#content #video"
+    },
+    "facebook": {
+      "caption": "Video Content\n\nLike and subscribe!\n\n#content #video"
+    }
+  },
+  "videoFiles": {
+    "youtube": "/data/shared/video_1742464564459/final/youtube_fb_version.mp4",
+    "instagram": "/data/shared/video_1742464564459/final/insta_subtitled.mp4",
+    "tiktok": "/data/shared/video_1742464564459/final/insta_subtitled.mp4",
+    "facebook": "/data/shared/video_1742464564459/final/youtube_fb_version.mp4",
+    "square": "/data/shared/video_1742464564459/final/square_subtitled.mp4",
+    "original": "/data/shared/video_1742464564459/final/video_1742464564459_final.mp4"
+  },
+  "timestamp": "2025-03-22T06:28:06.368Z"
+}

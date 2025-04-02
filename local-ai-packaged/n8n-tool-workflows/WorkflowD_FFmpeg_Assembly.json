@@ -1,0 +1,41 @@
+{
+    "name": "Workflow D - FFmpeg Assembly",
+    "nodes": [
+      {
+        "id": "1",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [240, 200],
+        "parameters": {}
+      },
+      {
+        "id": "2",
+        "name": "Execute Command (FFmpeg)",
+        "type": "n8n-nodes-base.executeCommand",
+        "typeVersion": 1,
+        "position": [480, 200],
+        "parameters": {
+          "command": "docker",
+          "arguments": "exec ffmpeg ffmpeg -y -i /data/shared/voiceover.mp3 ... /data/shared/final_video.mp4"
+        }
+      }
+    ],
+    "connections": {
+      "Manual Trigger": {
+        "main": [
+          [
+            {
+              "node": "Execute Command (FFmpeg)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "active": false,
+    "settings": {},
+    "id": "WorkflowD-abc123"
+  }
+  

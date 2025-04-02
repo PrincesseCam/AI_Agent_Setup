@@ -1,0 +1,530 @@
+{
+  "name": "script-generation-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "script-generation",
+        "options": {}
+      },
+      "name": "Script Generation Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -6880,
+        -560
+      ],
+      "webhookId": "script-generation",
+      "id": "c7ee68bc-b5a0-49fe-acb8-8edbf7052b00"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract the JSON response from the structured output\nconst aiResponse = $input.item.json;\n\n// The output is already in the correct format thanks to the parser\nconst scriptData = aiResponse;\n\n// Add the script data to our content parameters\nreturn {\n  ...$input.item.json,\n  scriptData,\n  title: scriptData.title,\n  fullScript: scriptData.script,\n  sections: scriptData.sections,\n  hashtags: scriptData.hashtags,\n  callToAction: scriptData.call_to_action || scriptData.callToAction\n};"
+      },
+      "name": "Extract Script Elements",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -5440,
+        -560
+      ],
+      "id": "cc472e56-7aa4-40a7-bb1d-f2ef1a8d44f5"
+    },
+    {
+      "parameters": {
+        "fileName": "={{$node[\"Script Generation Webhook\"].json.body.directories.main}}/script.txt",
+        "dataPropertyName": "text",
+        "options": {}
+      },
+      "name": "Save Script Text",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -4880,
+        -560
+      ],
+      "id": "2d5ef514-56d6-4c1e-80f1-f342ad487b65"
+    },
+    {
+      "parameters": {
+        "fileName": "={{$node[\"Script Generation Webhook\"].json.body.directories.main}}/script.json",
+        "dataPropertyName": "json",
+        "options": {
+          "append": false
+        }
+      },
+      "name": "Save Script JSON",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -4880,
+        -800
+      ],
+      "id": "ccf1d4c7-bbfc-4dea-9222-f45a11a3b473"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare a minimal data package to pass to next workflows\nreturn {\n  contentId: $input.item.json.contentId,\n  directories: $input.item.json.directories,\n  title: $input.item.json.title,\n  fullScript: $input.item.json.fullScript,\n  sections: $input.item.json.sections,\n  niche: $input.item.json.niche,\n  style: $input.item.json.style,\n  hashtags: $input.item.json.hashtags,\n  callToAction: $input.item.json.callToAction,\n  publishSettings: $input.item.json.publishSettings\n};"
+      },
+      "name": "Prepare Minimal Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -4480,
+        -560
+      ],
+      "id": "d89830a8-412b-416d-8706-4f2ff4925116"
+    },
+    {
+      "parameters": {
+        "functionCode": "const splitOutput = [];\n\n// For the audio workflow, we need the full script\nconst audioWorkflowData = {\n  contentId: $input.item.json.contentId,\n  directories: $input.item.json.directories,\n  fullScript: $input.item.json.fullScript,\n  title: $input.item.json.title,\n  workflowType: \"audio\"\n};\n\n// For the visual workflow, we need the sections with visual prompts\nconst visualWorkflowData = {\n  contentId: $input.item.json.contentId,\n  directories: $input.item.json.directories,\n  sections: $input.item.json.sections,\n  niche: $input.item.json.niche,\n  style: $input.item.json.style,\n  workflowType: \"visual\"\n};\n\nsplitOutput.push({json: audioWorkflowData});\nsplitOutput.push({json: visualWorkflowData});\n\nreturn splitOutput;"
+      },
+      "name": "Split for Parallel Processing",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -4220,
+        -400
+      ],
+      "id": "70fee176-6cf6-4667-8d12-968be12f03be"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.workflowType }}",
+              "value2": "audio"
+            }
+          ]
+        }
+      },
+      "name": "Route by Workflow Type",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -4020,
+        -400
+      ],
+      "id": "dc0dd6e6-4278-449c-be80-94b72365d61f"
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "http://host.docker.internal:5678/webhook-test/audio-generation",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"contentId\": \"{{ $('Script Generation Webhook').first().json.body.contentId }}\",\n  \"directories\": {{ JSON.stringify($node[\"Script Generation Webhook\"].json.body.directories) }},\n  \"fullScript\": {{ JSON.stringify($('Save Script Text').item.json.output.script) }},\n  \"title\": \"{{ $('Save Script Text').item.json.output.title }}\"\n}"
+      },
+      "name": "Trigger Audio Generation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -3800,
+        -480
+      ],
+      "id": "d1d7a2f4-60e7-469b-8d06-27e1edbb6ee9"
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "=http://host.docker.internal:5678/webhook-test/visual-generation",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={\n  \"contentId\": \"{{ $('Script Generation Webhook').first().json.body.contentId }}\",\n  \"directories\": {{JSON.stringify($node[\"Script Generation Webhook\"].json.body.directories)}},\n  \"sections\": {{JSON.stringify($node[\"Sections Agent\"].json.output.sections)}},\n  \"niche\": \"{{$node[\"Script Generation Webhook\"].json.body.niche}}\",\n  \"style\": \"{{$node[\"Script Generation Webhook\"].json.body.style}}\"\n}"
+      },
+      "name": "Trigger Visual Generation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        -3800,
+        -300
+      ],
+      "id": "a1647169-35d9-4f3b-906a-666b8f08517d"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -3940,
+        -880
+      ],
+      "id": "2b76df59-1256-4cd2-964c-216f8aa9e191"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5-coder:latest",
+        "options": {
+          "format": "json"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -6620,
+        -640
+      ],
+      "id": "742d465e-e924-4f25-bf5b-a41c798c812d",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "DbnV7fE9lNsuBlSr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5-coder:latest",
+        "options": {
+          "format": "json"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -6180,
+        -300
+      ],
+      "id": "8682a2fe-6bd6-49d2-b9aa-6b1e7dc5129b",
+      "name": "Ollama Chat Model1",
+      "credentials": {
+        "ollamaApi": {
+          "id": "DbnV7fE9lNsuBlSr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a professional script writer who specializes in creating engaging {{ $json.body.style }} style content for social media videos. Your goal is to create a script for a {{ $json.body.targetLength }} video about {{ $json.body.selectedTopic.topic }} in the {{ $json.body.niche }} niche.\n\nThe description of this topic is: {{ $json.body.selectedTopic.description }}\n\nCreate a script that delivers valuable information with an attention-grabbing opening and clear call to action at the end.\nRules for the script:\n- No scene directions, just voiceover text.\n- No filler phrases like 'imagine this' or 'what if I told you'.\n- Prioritize rhythm, punchy delivery, and engaging wordplay.\n- Avoid characters that ElevenLabs' voice AI might mispronounce, such as \"*\", \"/\", \"\\\\\",\"_\", or special symbols that could disrupt the flow of speech.\nAnd replace \" by '.\n- Ensure the text is structured naturally for clear and realistic pronunciation by AI voices.\n\nProvide your response/output in this exact JSON format:\n{\n  \"title\": \"An engaging, clickbaity title for the video\",\n  \"script\": \"The full script as a single string\",\n  \"call_to_action\": \"Clear call to action for the end of the video\"\n}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "name": "Script content agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -6540,
+        -840
+      ],
+      "id": "dd3201f2-9cad-43fb-b6ef-754c2221b7db",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a visual storyboard expert who specializes in breaking down scripts into visual sections.\n\nI have a script for a {{ $json.body.style }} style video about {{ $json.body.selectedTopic.topic }}. Here's the full script:\n\n{{ $json.output }}\n\nYour task is to:\n1. Divide this script into 3-5 logical sections (intro, main points, conclusion)\n2. For each section, provide a descriptive visual prompt explaining what should be shown on screen\n3. Create relevant hashtags for this content\n\nProvide your response in this exact JSON format:\n{\n  \"sections\": [\n    {\n      \"section_name\": \"intro\",\n      \"content\": \"The text that belongs in this section\",\n      \"visual_prompt\": \"Description of the visuals that should accompany this section\"\n    },\n    // More sections like main_1, main_2, conclusion, etc.\n  ],\n  \"hashtags\": [\"#tag1\", \"#tag2\", \"#tag3\"]\n}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -6120,
+        -540
+      ],
+      "id": "a8852d8d-1f9f-488a-a31f-2652c111205e",
+      "name": "Sections Agent",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "[\n  {\n  \"type\": \"object\",\n  \"properties\": {\n    \"sections\": {\n      \"type\": \"array\",\n      \"description\": \"Different sections of the video script\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"section_name\": {\n            \"type\": \"string\",\n            \"description\": \"Name of this section (e.g., intro, main_1, conclusion)\"\n          },\n          \"content\": {\n            \"type\": \"string\",\n            \"description\": \"Script text for this section\"\n          },\n          \"visual_prompt\": {\n            \"type\": \"string\",\n            \"description\": \"Description for the visuals that should accompany this section\"\n          }\n        },\n        \"required\": [\"section_name\", \"content\", \"visual_prompt\"]\n      }\n    },\n    \"hashtags\": {\n      \"type\": \"array\",\n      \"description\": \"Relevant hashtags for the video\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\"sections\", \"hashtags\"]\n}\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -5920,
+        -300
+      ],
+      "id": "05aef6f1-9ec3-4320-b8bb-fea02e31459b",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        -5660,
+        -560
+      ],
+      "id": "3ee8c36e-639a-4097-81eb-e23278bbe55d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "[\n  {\n  \"type\": \"object\",\n  \"properties\": {\n    \"title\": {\n      \"type\": \"string\",\n      \"description\": \"An engaging, clickbaity title for the video\"\n    },\n    \"script\": {\n      \"type\": \"string\",\n      \"description\": \"The full script text as a single string\"\n    },\n    \"call_to_action\": {\n      \"type\": \"string\",\n      \"description\": \"Clear call to action for the end of the video\"\n    }\n  },\n  \"required\": [\"title\", \"script\", \"call_to_action\"]\n}\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -6340,
+        -640
+      ],
+      "id": "6c75a29d-67e0-4245-819b-ae5571439463",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the script data from the input\nconst scriptData = $input.item.json;\nconst contentId = scriptData.contentId;\nconst scriptText = scriptData.script || \"\";\n\n// When running within Docker, we need to use the correct path structure\n// Get the directory structure from the webhooks or previous nodes\nconst baseDir = `/data/shared/${contentId}`;\n\n// Use the existing directory structure if it's already in the data\nlet directories;\nif (scriptData.directories) {\n  directories = scriptData.directories;\n} else {\n  // Create references to the directories that should already exist\n  directories = {\n    main: `${baseDir}/main`,\n    audio: `${baseDir}/audio`,\n    images: `${baseDir}/images`,\n    video: `${baseDir}/video`,\n    final: `${baseDir}/final`\n  };\n}\n\n// Store the directory structure \nscriptData.directories = directories;\n\n// Convert script to JSON string\nconst jsonString = JSON.stringify(scriptData, null, 2);\n\n// Convert both to binary buffers\nconst jsonBuffer = Buffer.from(jsonString, \"utf-8\");\nconst textBuffer = Buffer.from(scriptText, \"utf-8\");\n\n// Return an item with both binary properties\nreturn [\n  {\n    json: scriptData,\n    binary: {\n      json: {\n        data: jsonBuffer,\n        mimeType: \"application/json\",\n        fileName: \"script.json\"\n      },\n      text: {\n        data: textBuffer,\n        mimeType: \"text/plain\",\n        fileName: \"script.txt\"\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5220,
+        -560
+      ],
+      "id": "227102b7-0453-4fd7-8f81-65d6601abd0f",
+      "name": "Convert Script Data"
+    }
+  ],
+  "pinData": {
+    "Script Generation Webhook": [
+      {
+        "json": {
+          "headers": {
+            "accept": "application/json,text/*;q=0.99",
+            "content-type": "application/json",
+            "user-agent": "axios/1.7.4",
+            "content-length": "484",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "host": "host.docker.internal:5678",
+            "connection": "keep-alive"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "contentId": "video_1741064777985",
+            "niche": "tech",
+            "style": "informative",
+            "targetLength": "60s",
+            "directories": {
+              "main": "/data/shared/video_1741064777985/main",
+              "audio": "/data/shared/video_1741064777985/audio",
+              "images": "/data/shared/video_1741064777985/images",
+              "video": "/data/shared/video_1741064777985/video",
+              "final": "/data/shared/video_1741064777985/final"
+            },
+            "selectedTopic": {
+              "topic": "Tech Trends of the Decade",
+              "description": "A countdown of the top tech advancements of the past decade"
+            }
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/script-generation",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Script Generation Webhook": {
+      "main": [
+        [
+          {
+            "node": "Script content agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Sections Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Script Elements": {
+      "main": [
+        [
+          {
+            "node": "Convert Script Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Script Text": {
+      "main": [
+        [
+          {
+            "node": "Prepare Minimal Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Minimal Data": {
+      "main": [
+        [
+          {
+            "node": "Split for Parallel Processing",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split for Parallel Processing": {
+      "main": [
+        [
+          {
+            "node": "Route by Workflow Type",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Workflow Type": {
+      "main": [
+        [
+          {
+            "node": "Trigger Audio Generation",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Trigger Visual Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Script content agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Sections Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Script content agent": {
+      "main": [
+        [
+          {
+            "node": "Sections Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Sections Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Extract Script Elements",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sections Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Script content agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Script Data": {
+      "main": [
+        [
+          {
+            "node": "Save Script JSON",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save Script Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Tokyo",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "a7f2ce17-0fcc-4260-aeb3-3e2b69df7502",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4e52379637041ff10799c16d4fe1175e0d88d75b24685ea7cde857d7eef2b827"
+  },
+  "id": "f36GBrLGowM0akoc",
+  "tags": [
+    {
+      "createdAt": "2025-02-26T15:32:11.089Z",
+      "updatedAt": "2025-02-26T15:32:11.089Z",
+      "id": "He5P86YILA9R8z98",
+      "name": "content-creation"
+    }
+  ]
+}

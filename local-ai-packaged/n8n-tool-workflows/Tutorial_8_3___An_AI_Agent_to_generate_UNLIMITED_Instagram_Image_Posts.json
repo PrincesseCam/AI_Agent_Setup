@@ -1,0 +1,1772 @@
+{
+  "name": "Tutorial 8.3 - An AI Agent to generate UNLIMITED Instagram Image Posts",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "8502256a-2e0d-4c61-b2b1-2093d2018eb2",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.screenshotone.com/take?url={{ encodeURIComponent($json['Preview Link']) }}&viewport_width=800&viewport_height=800&format=jpg&block_ads=true&block_cookie_banners=true&block_banners_by_heuristics=false&block_trackers=true&delay=0&timeout=60&response_type=by_format&image_quality=80",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "options": {}
+      },
+      "id": "abc12add-69a9-407c-913e-454a46460161",
+      "name": "Request Screenshot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1378,
+        760
+      ],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "DzVQR8mUOUeCXBix",
+          "name": "Screenshot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af14a647-b7e0-4ee5-879b-356b91230f23",
+              "name": "Preview Link",
+              "value": "https://api.andynocode.com/preview/1",
+              "type": "string"
+            },
+            {
+              "id": "63b3da8e-e927-4375-a4a1-aac3d6187759",
+              "name": "Post Topic",
+              "value": "Robotics",
+              "type": "string"
+            },
+            {
+              "id": "b69c02a1-e4fe-4419-a593-45667dc7e40f",
+              "name": "Unique ID",
+              "value": "={{ $now.valueOf() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d554e0f4-38bb-428a-a147-020dc5cc2ad5",
+      "name": "Global Variable",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.together.xyz/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"black-forest-labs/FLUX.1-schnell\",\n  \"prompt\": \"{{ $json.choices[0].message.content.replaceSpecialChars().replaceAll('\\\"', '') }}\",\n  \"negative_prompt\": \"text, watermark, signature, paragraph, wording, letters, symbols, writing, nude, nudity, explicit content, obscene, inappropriate, offensive, forbidden, illegal, prohibited, sexual, graphic, violence, gore, blood, disturbing\",\n  \"width\": 1024,\n  \"height\": 1024,\n  \"steps\": 4,\n  \"n\": 1,\n  \"response_format\": \"b64_json\"\n}",
+        "options": {}
+      },
+      "id": "416373db-acc7-4197-99ec-28f3c30d7294",
+      "name": "Get Image Base 64",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        500
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "QZsvmtZA43DzE9MH",
+          "name": "Together AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.exa.ai/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $json.choices[0].message.content.replaceAll(\"\\\"\", \"\") }}\",\n  \"type\": \"neural\",\n  \"useAutoprompt\": true,\n  \"contents\": {\n    \"text\": true\n  }\n}",
+        "options": {}
+      },
+      "id": "c9f529ff-f1b8-4be0-b8d9-cbc19ba33348",
+      "name": "Exa Get Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1520,
+        240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "2kBDWYJCjuOW4hQH",
+          "name": "Exa API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "id": "7688e776-7f58-438e-aa2d-3a018c879dc1",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n          {\"role\": \"system\", \"content\": \"You are a helpful assistant that generates search queries based on category. There will be multiple category seperated by comma. Only generate one search query with one topic for today. Today's time {{ $now }}, text only without \\\"\\\" or ''\"},\n          {\"role\": \"user\", \"content\": \"{{ $json['Post Topic'] }}\"}\n        ],\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "24d7f195-89cc-4704-8265-148caf9c5004",
+      "name": "Get Natural Language Account",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1360,
+        240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Dkr5uVHPbgO4n8uI",
+          "name": "Deepseek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n          {\"role\": \"system\", \"content\": {{\nJSON.stringify(`You are an Instagram copywriter specializing in transforming blog content into engaging Instagram captions. Your goal is to create high-quality, professional captions that are concise, captivating, and optimized for Instagram.\n\nInstructions:\n\n1. Write in pure text format. Avoid using emojis or markdown styling.\nEnsure captions are within Instagram's character limit of 2,200 characters.\n2. Use a clear, conversational tone that remains professional and relatable.\n3. Craft strong hooks to capture attention, include clear value, and end with a compelling call-to-action (CTA).\n4. Use line breaks strategically to improve readability.\n5. Limit the caption to five hashtags only.\n6. Do not include heavy jargon; keep the language accessible to a broad audience.\n7. Limit the total characters to 2000 characters.\nObjective:\nDeliver captions that attract attention, encourage interaction, and drive actionable results, while staying within these constraints.`)\n}}},\n          {\"role\": \"user\", \"content\": {{ JSON.stringify($json.text) }}}\n        ],\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "c9f6ad7b-3c87-462b-855b-5cd56716dae1",
+      "name": "Convert into instagram content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        500
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Dkr5uVHPbgO4n8uI",
+          "name": "Deepseek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "maxItems": 3
+      },
+      "id": "eb42699c-a2d8-46e7-8fe2-e760adef2126",
+      "name": "Limit",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1820,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n          {\"role\": \"system\", \"content\": {{\nJSON.stringify(`Analyze the Instagram caption and extract key visual elements to create a Flux-compatible image prompt. Convert it into a Flux image prompt that incorporates the description and transforms it into a visual design. Ensure it adheres to Flux style parameters, including appropriate aspect ratio and palette, while reflecting the caption's mood and details.\n\nImage Style: retro-inspired lounge, shaggy rugs, vintage stereo, mid-century modern furniture with bold geometric wall art; color palette of teal, orange, and brown; clean minimalist illustration style with subtle textures and soft shadows. --aspect 9:16 --version 6.1.\n\n*** Output the prompt text only, without markdown or emoji`)\n}}},\n          {\"role\": \"user\", \"content\": {{ JSON.stringify($json.choices.first().message.content) }}}\n        ],\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "162ea73c-fdbd-4cc3-b8f0-8b8cf10a7fb7",
+      "name": "Convert into image prompt",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1380,
+        500
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Dkr5uVHPbgO4n8uI",
+          "name": "Deepseek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "output.choices[0].image_base64",
+        "options": {}
+      },
+      "id": "40beb90e-a0d9-4238-8645-42580399720b",
+      "name": "Convert to Image",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1700,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "object",
+        "operation": "create",
+        "bucketName": "n8n-storage-image",
+        "objectName": "=image-{{ $('Global Variable').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+        "createData": {},
+        "createQuery": {},
+        "encryptionHeaders": {},
+        "requestOptions": {}
+      },
+      "id": "adbdacf0-2bb6-4963-a7fa-57a2f4be77e9",
+      "name": "Save Image",
+      "type": "n8n-nodes-base.googleCloudStorage",
+      "typeVersion": 1,
+      "position": [
+        1860,
+        500
+      ],
+      "credentials": {
+        "googleCloudStorageOAuth2Api": {
+          "id": "APyiw1TsvCcUIbPY",
+          "name": "Google Cloud Storage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2dadfbe8-7de3-43c6-b440-a047ad11b359",
+              "name": "Image Link",
+              "value": "=https://{{ $json.bucket }}.storage.googleapis.com/image-{{ $('Global Variable').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5d3fc806-5208-41f4-97c2-db0db598ca9e",
+      "name": "Image URL",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2020,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n          {\"role\": \"system\", \"content\": {{\nJSON.stringify(`Analyze the Instagram caption and convert into 8 words title.\n\n*** Text only, don't use markdown and emoji`)\n}}},\n          {\"role\": \"user\", \"content\": {{ JSON.stringify($('Convert into instagram content').item.json.choices[0].message.content) }}}\n        ],\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "752bd710-bfdf-4470-aa0e-b6bc42ae9592",
+      "name": "Get Image Text",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1058,
+        760
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Dkr5uVHPbgO4n8uI",
+          "name": "Deepseek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "438af7f4-cc3f-46c9-a0ec-1974752dd642",
+              "name": "Preview Link",
+              "value": "={{ $('Global Variable').item.json['Preview Link'] }}?title={{ $json.choices[0].message.content }}&buttonText={{ \"View In Captions\" }}&imageUrl={{ $('Image URL').item.json['Image Link'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fb1765c7-9c83-40e1-8801-b21f1d9143ad",
+      "name": "Preview Link",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1218,
+        760
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxx",
+          "mode": "list",
+          "cachedResultName": "Image Instagram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Instagram Image Link": "=https://{{ $json.bucket }}.storage.googleapis.com/screenshot-{{ $('Global Variable').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+            "Flux Image Link": "=https://{{ $json.bucket }}.storage.googleapis.com/image-{{ $('Global Variable').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+            "Caption": "={{ $('Convert into instagram content').item.json.choices[0].message.content }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Flux Image Link",
+              "displayName": "Flux Image Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Instagram Image Link",
+              "displayName": "Instagram Image Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Caption",
+              "displayName": "Caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2f88973e-70d2-45c0-9fec-ebd5dfaae3d2",
+      "name": "Update Record",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1698,
+        760
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXkt3mkIhz4ruk1c",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Get Latest News Related to Your Channel (3 News)",
+        "height": 259.64092611288913,
+        "width": 1023.3935295777752,
+        "color": 7
+      },
+      "id": "28d22317-e896-412b-88aa-476393c20aa4",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1007.9124369072722,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Create Instagram Content ",
+        "height": 238.67409871326925,
+        "width": 317.9605580216103,
+        "color": 7
+      },
+      "id": "74fd7920-c7b6-451e-bd38-b741ae5c016d",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1009.4951243891733,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Create Flux Image For the Template\n",
+        "height": 237.1408039663953,
+        "width": 820.1786760582029,
+        "color": 7
+      },
+      "id": "b09f8497-aade-4e63-9259-ed050a036cdd",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1349.576992623833,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Create Instagram Post ",
+        "height": 230.23525895608736,
+        "width": 857.1219799321489,
+        "color": 7
+      },
+      "id": "d645d451-a9dd-492e-814f-4ccce49fd3dc",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1011.7597565878309,
+        700
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/{{ $json.instagram_id }}/media",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"image_url\": \"{{ $('Grab Instagram Post').item.json['Instagram Image Link'] }}\",\n  \"caption\": {{ JSON.stringify($('Grab Instagram Post').item.json.Caption) }},\n  \"access_token\": \"{{ $('Get Access Token1').item.json.access_token }}\"\n}",
+        "options": {}
+      },
+      "id": "0af4bc72-dd8e-4785-9015-39dc0f563db6",
+      "name": "Post Instagram Media",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1720,
+        1380
+      ]
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "id": "43dd1777-bd95-4b8e-8f52-2077cea0d49b",
+      "name": "Wait1",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1880,
+        1380
+      ],
+      "webhookId": "3392ffb7-a915-4b05-b7b1-bd3728550809"
+    },
+    {
+      "parameters": {
+        "content": "## Upload to Instagram\n",
+        "height": 269.36281207830757,
+        "width": 1402.5793795406003,
+        "color": 7
+      },
+      "id": "61663e3a-0aab-4e09-9569-73544bba6718",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        1300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/oauth/access_token?grant_type=fb_exchange_token&client_id={{ $json.app_id }}&client_secret={{ $json.app_secret }}&fb_exchange_token={{ $json.access_token }}",
+        "options": {}
+      },
+      "id": "1252a5db-a9a9-458d-a0c1-359c214c285a",
+      "name": "Exchange Long Credentials",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1340,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "45ae74a0-7d74-4ca4-909b-276a63578442",
+              "name": "access_token",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "c3ad863b-e3e8-4258-bd29-f408c1bf900a",
+              "name": "app_secret",
+              "value": "",
+              "type": "string"
+            },
+            {
+              "id": "67800dde-27f3-402a-bb29-221fb6a1480e",
+              "name": "account_id",
+              "value": "xxxxxxxxxxxxx",
+              "type": "string"
+            },
+            {
+              "id": "c8676dfd-f42b-4b37-92cc-95a2d4dfe0fe",
+              "name": "language",
+              "value": "Traditional Chinese (Hong Kong)",
+              "type": "string"
+            },
+            {
+              "id": "0893dc2a-2cad-43dc-9aa8-b7a461e4d04f",
+              "name": "app_id",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cbc0e3f9-e855-48f8-86d8-3c0b17cafe53",
+      "name": "First Access Global",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1200,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/me/accounts?access_token={{ $json.access_token }}",
+        "options": {}
+      },
+      "id": "5393b7d5-134e-4a87-81de-3d8534311328",
+      "name": "Get Page Access Token",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2080,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v21.0/{{ $json.data[0].id }}?fields=instagram_business_account&access_token={{ $('Get Access Token').item.json.access_token }}",
+        "options": {}
+      },
+      "id": "b9ea816a-16cd-4777-b590-6339f545900a",
+      "name": "Get Linked Instagram Accounts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2260,
+        1080
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## First Time Get Long Lived Access Token",
+        "height": 251.7688230124266,
+        "width": 686.6152350287123,
+        "color": 7
+      },
+      "id": "7295c4c4-f7eb-42ae-99d2-a80bccf94276",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Get Instagram ID",
+        "height": 253.18844684305412,
+        "width": 879.6840759940549,
+        "color": 7
+      },
+      "id": "2a068f5a-a191-436d-a6a0-a3b85f76ec85",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1720,
+        1000
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "fb_access_token",
+        "value": "={{ $json.access_token }}"
+      },
+      "id": "4ea6801c-d39b-4830-a862-b45c76ba201d",
+      "name": "Save Access Token",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1500,
+        1080
+      ],
+      "credentials": {
+        "redis": {
+          "id": "ItUh8nT63JJqeEwt",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "access_token",
+        "key": "fb_access_token",
+        "options": {}
+      },
+      "id": "ba7a9fdc-5460-47fd-9ac2-b911d751910a",
+      "name": "Get Access Token",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        1080
+      ],
+      "credentials": {
+        "redis": {
+          "id": "ItUh8nT63JJqeEwt",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "ig_id",
+        "value": "={{ $json.instagram_business_account.id }}"
+      },
+      "id": "842e2a62-d14c-4b3f-838f-45d6497be51d",
+      "name": "Save Instagram ID",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        2440,
+        1080
+      ],
+      "credentials": {
+        "redis": {
+          "id": "ItUh8nT63JJqeEwt",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxx",
+          "mode": "list",
+          "cachedResultName": "Image Instagram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "id": "7efb1655-ddcc-422c-b558-0aacb22c79b1",
+      "name": "Grab Instagram Post",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        1200,
+        1380
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXkt3mkIhz4ruk1c",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "access_token",
+        "key": "fb_access_token",
+        "options": {}
+      },
+      "id": "953a3926-9e54-4610-8a8f-b49235d80e69",
+      "name": "Get Access Token1",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1380,
+        1380
+      ],
+      "credentials": {
+        "redis": {
+          "id": "ItUh8nT63JJqeEwt",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "propertyName": "instagram_id",
+        "key": "ig_id",
+        "options": {}
+      },
+      "id": "d3cc94f5-4c50-48d4-ab22-041413cbb3a7",
+      "name": "Get Instagram ID",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1540,
+        1380
+      ],
+      "credentials": {
+        "redis": {
+          "id": "ItUh8nT63JJqeEwt",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxx",
+          "mode": "list",
+          "cachedResultName": "Image Instagram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "row_number": "={{ $('Grab Instagram Post').item.json.row_number }}",
+            "Status": "Posted",
+            "Post Date": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "row_number"
+          ],
+          "schema": [
+            {
+              "id": "Flux Image Link",
+              "displayName": "Flux Image Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Instagram Image Link",
+              "displayName": "Instagram Image Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Caption",
+              "displayName": "Caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post Date",
+              "displayName": "Post Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": false
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fb5eb013-2491-4723-bfff-83309d1866d1",
+      "name": "Update Image Status",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2220,
+        1380
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXkt3mkIhz4ruk1c",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "object",
+        "operation": "create",
+        "bucketName": "n8n-storage-image",
+        "objectName": "=screenshot-{{ $('Global Variable').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+        "createData": {},
+        "createQuery": {},
+        "encryptionHeaders": {},
+        "requestOptions": {}
+      },
+      "id": "d1d39058-e236-4233-9121-a2707d7e31ac",
+      "name": "Save Screenshot",
+      "type": "n8n-nodes-base.googleCloudStorage",
+      "typeVersion": 1,
+      "position": [
+        1538,
+        760
+      ],
+      "credentials": {
+        "googleCloudStorageOAuth2Api": {
+          "id": "APyiw1TsvCcUIbPY",
+          "name": "Google Cloud Storage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Bonus - Motivational Image Template",
+        "height": 682.4026415846778,
+        "width": 1003.2799402980742,
+        "color": 2
+      },
+      "id": "7f3a8553-0704-4703-b039-2602c8b3470c",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "af14a647-b7e0-4ee5-879b-356b91230f23",
+              "name": "Preview Link",
+              "value": "https://api.andynocode.com/preview/2",
+              "type": "string"
+            },
+            {
+              "id": "63b3da8e-e927-4375-a4a1-aac3d6187759",
+              "name": "Post Topic",
+              "value": "Motivational Speech For 20s",
+              "type": "string"
+            },
+            {
+              "id": "b69c02a1-e4fe-4419-a593-45667dc7e40f",
+              "name": "Unique ID",
+              "value": "={{ $now.valueOf() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8780cfee-371b-40f9-a194-609442eadb79",
+      "name": "Global Variable1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2460,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"response_format\": {\n      \"type\": \"json_object\"\n  },\n  \"messages\": [\n          {\"role\": \"system\", \"content\": {{\nJSON.stringify(`You are an Instagram content creator specializing in crafting motivational and inspirational captions. Your goal is to write captions that inspire, empower, and resonate deeply with your audience, encouraging them to take positive action.\n\nInstructions:\n\nWrite the caption in plain text format, without emojis or markdown formatting.\nEnsure the caption fits within Instagram’s 2,200-character limit, but aim for brevity (maximum of 2,000 characters).\nUse a clear, conversational tone that feels both professional and approachable.\nBegin with a powerful hook that grabs attention and draws the reader in.\nIncorporate a meaningful, thought-provoking message that adds value and uplifts.\nConclude with a compelling call-to-action (CTA) that encourages engagement or reflection.\nUse strategic line breaks to enhance readability.\nLimit to a maximum of five relevant hashtags.\nAvoid using punctuation marks.\nKeep the language simple and relatable, avoiding jargon.\nObjective: Create captions that motivate, inspire action, and drive meaningful interactions with the audience, while remaining within Instagram’s character limit and guidelines.\n\nExpected Output:\n\ntitle: A 12-word string that encapsulates the theme, without punctuation marks.\ncaption: A motivational message limited to 2,000 characters.\n\nEXAMPLE JSON OUTPUT:\n{\n    \"title\": \"Empower Your Journey Start Today and Make Your Dreams Real\",\n    \"caption\": \"Every great accomplishment begins with a single step Whether you're starting a new project pursuing a dream or overcoming an obstacle the first move is always the hardest But remember every journey starts with a decision to try If you feel uncertain take a deep breath and trust that you are capable of far more than you think Growth happens when you push beyond your comfort zone You have everything you need to succeed within you already Stay focused stay committed and keep moving forward no matter how small the steps may seem Every step is progress and every challenge is an opportunity to grow Don't let fear hold you back Embrace the unknown take risks and believe in your strength Your dreams are closer than you think but only if you take that first step Start today and let your journey unfold Ready to take your first step Let us know how you’ll begin your journey #EmpowerYourself #TakeTheLeap #DreamBig #GrowthMindset #BelieveInYou\"\n}\n`)\n}}},\n          {\"role\": \"user\", \"content\": \"{{ $json['Post Topic'] }}\"}\n        ],\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "e5bbe0f9-5a42-4cee-8f0d-98620731676f",
+      "name": "Convert into instagram content1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2640,
+        240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Dkr5uVHPbgO4n8uI",
+          "name": "Deepseek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst updatedItems = items.map((item) => {\n  const content = item?.json?.choices[0]?.message?.content;\n  try {\n    const contentJson = JSON.parse(content);\n    item.json.choices[0].message.content = contentJson;\n  } catch (error) {\n    console.log(\"Error parsing content to JSON:\", error);\n  }\n  return item;\n});\nreturn updatedItems;\n"
+      },
+      "id": "0fcfb779-a6f7-4884-a28e-3f9d30e7035c",
+      "name": "Convert to JSON Object",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2840,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepseek.com/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"deepseek-chat\",\n  \"messages\": [\n          {\"role\": \"system\", \"content\": {{\nJSON.stringify(`Analyze the Instagram caption and extract key visual elements to create a Flux-compatible image prompt. Convert it into a Flux image prompt that incorporates the description and transforms it into a visual design. Ensure it adheres to Flux style parameters, including appropriate aspect ratio and palette, while reflecting the caption's mood and details.\n\nImage Style: An atmospheric cyberpunk street scene at night, featuring narrow alleyways filled with neon-lit signs in Japanese, glowing red and blue lights reflecting on wet pavement. A lone figure walks a small dog down the alley, creating a moody and mysterious ambiance. The street is cluttered with air conditioning units, cables, and pipes, with dark shadows and a futuristic, dystopian vibe. The environment is urban and dense, with a strong contrast of vibrant neon colors against the dark night backdrop.\n\n*** Output the prompt text only, without markdown or emoji`)\n}}},\n          {\"role\": \"user\", \"content\": {{ JSON.stringify($json.choices.first().message.content.caption) }}}\n        ],\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "id": "8cf8f821-8320-4beb-87d6-24fc509c74b3",
+      "name": "Convert into image prompt1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3040,
+        240
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Dkr5uVHPbgO4n8uI",
+          "name": "Deepseek API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "toBinary",
+        "sourceProperty": "output.choices[0].image_base64",
+        "options": {}
+      },
+      "id": "d4d6aeca-eab6-4771-87c7-e70cbd7cd966",
+      "name": "Convert to Image1",
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        2460,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.together.xyz/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"black-forest-labs/FLUX.1-schnell\",\n  \"prompt\": \"{{ $json.choices[0].message.content.replaceSpecialChars().replaceAll('\\\"', '') }}\",\n  \"negative_prompt\": \"text, watermark, signature, paragraph, wording, letters, symbols, writing, nude, nudity, explicit content, obscene, inappropriate, offensive, forbidden, illegal, prohibited, sexual, graphic, violence, gore, blood, disturbing\",\n  \"width\": 1024,\n  \"height\": 1024,\n  \"steps\": 4,\n  \"n\": 1,\n  \"response_format\": \"b64_json\"\n}",
+        "options": {}
+      },
+      "id": "f8eb1bec-a2c9-4ced-af65-c23b4f971d35",
+      "name": "Get Image Base ",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2280,
+        440
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "QZsvmtZA43DzE9MH",
+          "name": "Together AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "object",
+        "operation": "create",
+        "bucketName": "n8n-storage-image",
+        "objectName": "=image-{{ $('Global Variable1').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+        "createData": {},
+        "createQuery": {},
+        "encryptionHeaders": {},
+        "requestOptions": {}
+      },
+      "id": "638e6b01-f30d-4f5f-be86-1de4193fecfd",
+      "name": "Save Image1",
+      "type": "n8n-nodes-base.googleCloudStorage",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        440
+      ],
+      "credentials": {
+        "googleCloudStorageOAuth2Api": {
+          "id": "APyiw1TsvCcUIbPY",
+          "name": "Google Cloud Storage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2dadfbe8-7de3-43c6-b440-a047ad11b359",
+              "name": "Image Link",
+              "value": "=https://{{ $json.bucket }}.storage.googleapis.com/image-{{ $('Global Variable1').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "76b612e1-1a86-4156-b8dd-a4279d2d3946",
+      "name": "Image URL1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2800,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "438af7f4-cc3f-46c9-a0ec-1974752dd642",
+              "name": "Preview Link",
+              "value": "={{ $('Global Variable1').item.json['Preview Link'] }}?title={{ $('Convert to JSON Object').item.json.choices[0].message.content.title }}&buttonText={{ \"View In Captions\" }}&imageUrl={{ $json['Image Link'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "34809c8b-be48-417f-9e2a-3214b3e65afa",
+      "name": "Preview Link1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2960,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.screenshotone.com/take?url={{ encodeURIComponent($json['Preview Link']) }}&viewport_width=800&viewport_height=800&format=jpg&block_ads=true&block_cookie_banners=true&block_banners_by_heuristics=false&block_trackers=true&delay=0&timeout=60&response_type=by_format&image_quality=80",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "options": {}
+      },
+      "id": "f55aebe7-36d3-49ef-a4ce-6b23740c2a7e",
+      "name": "Request Screenshot1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2280,
+        660
+      ],
+      "credentials": {
+        "httpQueryAuth": {
+          "id": "DzVQR8mUOUeCXBix",
+          "name": "Screenshot API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "object",
+        "operation": "create",
+        "bucketName": "n8n-storage-image",
+        "objectName": "=screenshot-{{ $('Global Variable1').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+        "createData": {},
+        "createQuery": {},
+        "encryptionHeaders": {},
+        "requestOptions": {}
+      },
+      "id": "179e2137-71c4-41b2-90a8-5f627d5d97ab",
+      "name": "Save Screenshot1",
+      "type": "n8n-nodes-base.googleCloudStorage",
+      "typeVersion": 1,
+      "position": [
+        2460,
+        660
+      ],
+      "credentials": {
+        "googleCloudStorageOAuth2Api": {
+          "id": "APyiw1TsvCcUIbPY",
+          "name": "Google Cloud Storage account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "xxxxx",
+          "mode": "list",
+          "cachedResultName": "Image Instagram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Schedule",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/xxxxx/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Instagram Image Link": "=https://{{ $json.bucket }}.storage.googleapis.com/screenshot-{{ $('Global Variable1').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+            "Flux Image Link": "=https://{{ $json.bucket }}.storage.googleapis.com/image-{{ $('Global Variable1').item.json['Unique ID'] }}-{{ $itemIndex + 1 }}.jpeg",
+            "Caption": "={{ $('Convert to JSON Object').item.json.choices[0].message.content.caption }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Flux Image Link",
+              "displayName": "Flux Image Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Instagram Image Link",
+              "displayName": "Instagram Image Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Caption",
+              "displayName": "Caption",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7c82ebed-ab58-4da7-aa9e-9994a4947331",
+      "name": "Update Record1",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2640,
+        660
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "fXkt3mkIhz4ruk1c",
+          "name": "Google Sheets Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Remarks\n\nDemo\n- xxxxxxxxxxxxx - Proxa\n- 5 Seconds Show Result\n\nConnect\n- Deepseek needs Bearer\n- Exa No need\n- Together AI\n- Screenshotone\n- Andynocode.com - For Preview\n\nWorkflow 1:\n- Unique ID -> Prevent Caching on Google Cloud\n- Image Prompt -> Image Style in Chat GPT\nhttps://prompthero.com/search?q=retro\n- Request Screenshot -> encodeURIComponent to replace white space to special character",
+        "height": 556.3918994810819,
+        "width": 462.58929740091514,
+        "color": 7
+      },
+      "id": "11491318-48ed-4015-9264-74d85f9df8c9",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "id": "5685f384-e46b-4502-bd4d-1a622376428a",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        1040,
+        1380
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v21.0/{{ $('Get Instagram ID').item.json.instagram_id }}/media_publish",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"creation_id\": \"{{ $json.id }}\",\n  \"access_token\": \"{{ $('Get Access Token1').item.json.access_token }}\"\n}",
+        "options": {}
+      },
+      "id": "7fb15889-a02d-49bb-80cc-4b198ce2e605",
+      "name": "Post Instagram Image Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2040,
+        1380
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Global Variable",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Global Variable": {
+      "main": [
+        [
+          {
+            "node": "Get Natural Language Account",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exa Get Content": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Natural Language Account": {
+      "main": [
+        [
+          {
+            "node": "Exa Get Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Convert into instagram content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert into instagram content": {
+      "main": [
+        [
+          {
+            "node": "Convert into image prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert into image prompt": {
+      "main": [
+        [
+          {
+            "node": "Get Image Base 64",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image Base 64": {
+      "main": [
+        [
+          {
+            "node": "Convert to Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Image": {
+      "main": [
+        [
+          {
+            "node": "Save Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Image": {
+      "main": [
+        [
+          {
+            "node": "Image URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image URL": {
+      "main": [
+        [
+          {
+            "node": "Get Image Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image Text": {
+      "main": [
+        [
+          {
+            "node": "Preview Link",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preview Link": {
+      "main": [
+        [
+          {
+            "node": "Request Screenshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Screenshot": {
+      "main": [
+        [
+          {
+            "node": "Save Screenshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Instagram Media": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Post Instagram Image Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exchange Long Credentials": {
+      "main": [
+        [
+          {
+            "node": "Save Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "First Access Global": {
+      "main": [
+        [
+          {
+            "node": "Exchange Long Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Page Access Token": {
+      "main": [
+        [
+          {
+            "node": "Get Linked Instagram Accounts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Linked Instagram Accounts": {
+      "main": [
+        [
+          {
+            "node": "Save Instagram ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Access Token": {
+      "main": [
+        [
+          {
+            "node": "Get Page Access Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Grab Instagram Post": {
+      "main": [
+        [
+          {
+            "node": "Get Access Token1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Access Token1": {
+      "main": [
+        [
+          {
+            "node": "Get Instagram ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Instagram ID": {
+      "main": [
+        [
+          {
+            "node": "Post Instagram Media",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Screenshot": {
+      "main": [
+        [
+          {
+            "node": "Update Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Global Variable1": {
+      "main": [
+        [
+          {
+            "node": "Convert into instagram content1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert into instagram content1": {
+      "main": [
+        [
+          {
+            "node": "Convert to JSON Object",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to JSON Object": {
+      "main": [
+        [
+          {
+            "node": "Convert into image prompt1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image Base ": {
+      "main": [
+        [
+          {
+            "node": "Convert to Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert into image prompt1": {
+      "main": [
+        [
+          {
+            "node": "Get Image Base ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to Image1": {
+      "main": [
+        [
+          {
+            "node": "Save Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Image1": {
+      "main": [
+        [
+          {
+            "node": "Image URL1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image URL1": {
+      "main": [
+        [
+          {
+            "node": "Preview Link1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preview Link1": {
+      "main": [
+        [
+          {
+            "node": "Request Screenshot1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Screenshot1": {
+      "main": [
+        [
+          {
+            "node": "Save Screenshot1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Screenshot1": {
+      "main": [
+        [
+          {
+            "node": "Update Record1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Instagram Image Post": {
+      "main": [
+        [
+          {
+            "node": "Update Image Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "882fc7cd-94c3-4693-ad39-9be9012834ef",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4221cc7208f142ff91856b22776eec81b71c256154ec8030569832c22d0c66d9"
+  },
+  "id": "lVqAYNfR5vEy0sNm",
+  "tags": []
+}

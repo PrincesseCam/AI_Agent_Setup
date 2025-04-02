@@ -1,0 +1,55 @@
+{
+  "output": [
+    {
+      "description": "How quantum computing is changing the cybersecurity landscape",
+      "topic": "The Impact of Quantum Computing on Cybersecurity"
+    },
+    {
+      "description": "How VR is transforming traditional learning methods",
+      "topic": "Revolutionizing Education: The Rise of Virtual Reality"
+    },
+    {
+      "description": "How 5G connectivity is shaping the future of urban infrastructure",
+      "topic": "The Role of 5G in Smart Cities"
+    },
+    {
+      "description": "How technology can contribute to environmental sustainability",
+      "topic": "Sustainable Tech: Innovations for a Greener Future"
+    },
+    {
+      "description": "How remote work is evolving with technological advancements",
+      "topic": "The Future of Work: Remote and Hybrid Solutions"
+    }
+  ],
+  "selectedTopic": {
+    "description": "How quantum computing is changing the cybersecurity landscape",
+    "topic": "The Impact of Quantum Computing on Cybersecurity"
+  },
+  "allTopics": [
+    {
+      "description": "How quantum computing is changing the cybersecurity landscape",
+      "topic": "The Impact of Quantum Computing on Cybersecurity"
+    },
+    {
+      "description": "How VR is transforming traditional learning methods",
+      "topic": "Revolutionizing Education: The Rise of Virtual Reality"
+    },
+    {
+      "description": "How 5G connectivity is shaping the future of urban infrastructure",
+      "topic": "The Role of 5G in Smart Cities"
+    },
+    {
+      "description": "How technology can contribute to environmental sustainability",
+      "topic": "Sustainable Tech: Innovations for a Greener Future"
+    },
+    {
+      "description": "How remote work is evolving with technological advancements",
+      "topic": "The Future of Work: Remote and Hybrid Solutions"
+    }
+  ],
+  "workflowData": {
+    "topic": "The Impact of Quantum Computing on Cybersecurity",
+    "topicDescription": "How quantum computing is changing the cybersecurity landscape",
+    "publishSettings": {}
+  }
+}

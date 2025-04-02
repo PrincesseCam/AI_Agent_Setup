@@ -1,0 +1,390 @@
+{
+  "name": "assembly-readiness-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "check-assembly-readiness",
+        "options": {}
+      },
+      "name": "Assembly Readiness Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -3380,
+        -500
+      ],
+      "webhookId": "check-assembly-readiness",
+      "id": "e3a7415c-e498-4dfe-87f4-66b76035a49d"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check which component is reporting completion\nconst audioComplete = $input.first().json.body.audioComplete || false;\nconst visualComplete = $input.first().json.body.visualComplete || false;\nconst contentId = $input.item.json.body.contentId;\nconst directories = $input.item.json.directories;\n\n// Look for completion signals in the filesystem as well\nreturn {\n  audioComplete,\n  visualComplete,\n  contentId,\n  directories,\n  audioSignalPath: `$input.first().json.body.directories.main/audio_complete.json`,\n  visualSignalPath: `$input.first().json.body.directories.images/visual_complete.json`\n};"
+      },
+      "name": "Parse Completion Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -3200,
+        -500
+      ],
+      "id": "de20a75e-86c9-4ca0-9127-5d91308f033d"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.audioComplete }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Audio Complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -3020,
+        -700
+      ],
+      "id": "c81f152c-bf47-449d-a90a-6703f90f3197"
+    },
+    {
+      "parameters": {
+        "command": "if (Test-Path -Path \"{{ $json.audioSignalPath }}\") { Write-Output \"true\" } else { Write-Output \"false\" }"
+      },
+      "name": "Check Audio Signal File",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -2840,
+        -600
+      ],
+      "id": "07ae6bcb-768c-44db-a526-518cf6724c4c"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Update the audio complete status based on file check\nlet audioComplete = $input.item.json.audioComplete;\n\nif ($input.item.json.executionOutput && typeof $input.item.json.executionOutput === 'string') {\n  if ($input.item.json.executionOutput.trim() === \"true\") {\n    audioComplete = true;\n  }\n}\n\nreturn {\n  ...$input.item.json,\n  audioComplete\n};"
+      },
+      "name": "Update Audio Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2680,
+        -720
+      ],
+      "id": "c79160e2-044c-4705-a76d-636d2a70c481"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.visualComplete }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Visual Complete?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -3020,
+        -280
+      ],
+      "id": "c5790443-d7c5-4261-a8e4-7669573c50ef"
+    },
+    {
+      "parameters": {
+        "command": "if (Test-Path -Path \"{{ $json.visualSignalPath }}\") { Write-Output \"true\" } else { Write-Output \"false\" }"
+      },
+      "name": "Check Visual Signal File",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -2860,
+        -140
+      ],
+      "id": "e840639c-7bc8-4c84-927a-3c1fb0c359b6"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Update the visual complete status based on file check\nlet visualComplete = $input.item.json.visualComplete;\n\nif ($input.item.json.executionOutput && typeof $input.item.json.executionOutput === 'string') {\n  if ($input.item.json.executionOutput.trim() === \"true\") {\n    visualComplete = true;\n  }\n}\n\nreturn {\n  ...$input.item.json,\n  visualComplete\n};"
+      },
+      "name": "Update Visual Status",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2660,
+        -300
+      ],
+      "id": "91a6a683-9d68-4f67-8aea-c4e46c822141"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if both components are complete\nconst audioComplete = $input.item.json.audioComplete;\nconst visualComplete = $input.item.json.visualComplete;\nconst bothComplete = audioComplete && visualComplete;\n\n// Get content loading paths for the video assembly\nlet audioFile, imageFiles;\nif (bothComplete) {\n  try {\n    // Try to read the completion files to get the exact paths\n    const audioData = require($input.item.json.audioSignalPath);\n    const visualData = require($input.item.json.visualSignalPath);\n    \n    audioFile = audioData.audioFile;\n    imageFiles = visualData.imageFiles;\n  } catch (e) {\n    // Fallback to default paths if files can't be read\n    audioFile = `${$('Assembly Readiness Webhook').first().json.body.directories.audio}/narration.mp3`;\n    const totalImages = 5; // Default assumption\n    imageFiles = Array.from({length: totalImages}, (_, i) => \n      `${$('Assembly Readiness Webhook').first().json.body.directories.images}\\\\image${i.toString().padStart(2, '0')}.png`\n    );\n  }\n}\n\nreturn {\n  ...$input.item.json,\n  bothComplete,\n  audioFile,\n  imageFiles,\n  readyForAssembly: bothComplete\n};"
+      },
+      "name": "Check Both Complete",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2480,
+        -500
+      ],
+      "id": "0c86b343-140f-4f87-bf89-9dea82bac96e"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.readyForAssembly }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "name": "Ready for Assembly?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -2280,
+        -500
+      ],
+      "id": "970a492c-832d-4f63-814f-11bb8c0978af"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5678/webhook-test/video-assembly",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"contentId\": \"{{$json.contentId}}\",\n  \"directories\": {{ JSON.stringify($('Assembly Readiness Webhook').item.json.body.directories) }},\n  \"audioFile\": \"{{$json.audioFile}}\",\n  \"imageFiles\": {{JSON.stringify($json.imageFiles)}}\n}",
+        "options": {}
+      },
+      "name": "Trigger Video Assembly",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -2100,
+        -640
+      ],
+      "id": "21a812aa-4d18-4deb-ac2d-338ad6884510"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -1900,
+        -480
+      ],
+      "id": "2ee859bc-a37f-4413-ab7c-e1577892c030"
+    }
+  ],
+  "pinData": {
+    "Assembly Readiness Webhook": [
+      {
+        "json": {
+          "headers": {
+            "accept": "application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7",
+            "content-type": "application/json",
+            "user-agent": "axios/1.7.4",
+            "content-length": "317",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "host": "host.docker.internal:5678",
+            "connection": "keep-alive"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "contentId": "video_1741064777985",
+            "audioComplete": true,
+            "visualComplete": true,
+            "directories": {
+              "main": "/data/shared/video_1741064777985/main",
+              "audio": "/data/shared/video_1741064777985/audio",
+              "images": "/data/shared/video_1741064777985/images",
+              "video": "/data/shared/video_1741064777985/video",
+              "final": "/data/shared/video_1741064777985/final"
+            },
+            "visualCompleteFile": "/data/shared/video_1741064777985/main/visual_complete.json"
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/check-assembly-readiness",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Assembly Readiness Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Completion Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Completion Status": {
+      "main": [
+        [
+          {
+            "node": "Audio Complete?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Visual Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audio Complete?": {
+      "main": [
+        [
+          {
+            "node": "Update Audio Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check Audio Signal File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Audio Signal File": {
+      "main": [
+        [
+          {
+            "node": "Update Audio Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Audio Status": {
+      "main": [
+        [
+          {
+            "node": "Check Both Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Visual Complete?": {
+      "main": [
+        [
+          {
+            "node": "Update Visual Status",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check Visual Signal File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Visual Signal File": {
+      "main": [
+        [
+          {
+            "node": "Update Visual Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Visual Status": {
+      "main": [
+        [
+          {
+            "node": "Check Both Complete",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Both Complete": {
+      "main": [
+        [
+          {
+            "node": "Ready for Assembly?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ready for Assembly?": {
+      "main": [
+        [
+          {
+            "node": "Trigger Video Assembly",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Trigger Video Assembly": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5df89ec6-b6c0-4eb9-9d6c-ab4dc032ff73",
+  "meta": {
+    "instanceId": "4e52379637041ff10799c16d4fe1175e0d88d75b24685ea7cde857d7eef2b827"
+  },
+  "id": "MNoVXQX6Be9g8NS8",
+  "tags": [
+    {
+      "createdAt": "2025-02-26T15:32:11.089Z",
+      "updatedAt": "2025-02-26T15:32:11.089Z",
+      "id": "He5P86YILA9R8z98",
+      "name": "content-creation"
+    }
+  ]
+}

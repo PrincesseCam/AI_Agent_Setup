@@ -1,0 +1,428 @@
+{
+  "name": "Template 9 - How I Built a Blog with v0 and an AI Agent to Repurpose News into Blogs (No-Code)",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.exa.ai/search",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            },
+            {
+              "name": "content-type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"query\": \"{{ $json.message.content }}\",\n  \"type\": \"neural\",\n  \"useAutoprompt\": true,\n  \"contents\": {\n    \"text\": true\n  }\n}",
+        "options": {}
+      },
+      "id": "6f0cca30-63a2-4944-912d-7fcafee8d078",
+      "name": "Exa Get Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1560, 1560],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "Xk8DwYjCju0W4hQz",
+          "name": "Exa API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "06b97a1a-6932-40b3-ae36-70f3fc1faee5",
+              "name": "category",
+              "value": "Travel, Vacation",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "db29661e-7148-46c6-9c98-93b261ce7c59",
+      "name": "Set Global Credential",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1120, 1560]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "results",
+        "options": {}
+      },
+      "id": "d2112f69-9c9d-49b1-ad61-a0907d2acc53",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [980, 1760]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 1
+            }
+          ]
+        }
+      },
+      "id": "8155f533-e64e-4820-a3f5-4fb769d79d93",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [960, 1560]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ab6b4827-05a4-40eb-b935-069202182a6f",
+              "leftValue": "={{ $json.message.content }}",
+              "rightValue": "False",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e8b383b6-7912-4336-927a-7b2b1c5f4248",
+      "name": "If false",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1560, 1760]
+    },
+    {
+      "parameters": {
+        "tableId": "posts",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "excerpt",
+              "fieldValue": "={{ $json.message.content.replaceAll(\"\\\"\", \"\") }}"
+            },
+            {
+              "fieldId": "content",
+              "fieldValue": "={{ $('Article Repurpose').item.json.message.content }}"
+            },
+            {
+              "fieldId": "slug",
+              "fieldValue": "={{ $json.message.content.replaceAll(/[^\\w\\s]/gi, '').replaceAll(\" \", \"-\").toLowerCase() }}"
+            },
+            {
+              "fieldId": "category",
+              "fieldValue": "Personal experience"
+            },
+            {
+              "fieldId": "image_url",
+              "fieldValue": "/placeholder.svg?height=400&width=600"
+            },
+            {
+              "fieldId": "title",
+              "fieldValue": "={{ $('Convert Title').item.json.message.content.replaceAll(\"\\\"\", \"\") }}"
+            }
+          ]
+        }
+      },
+      "id": "e3193c71-617c-40f9-b934-4fac0da6c399",
+      "name": "Supabase",
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [1560, 1980],
+      "credentials": {
+        "supabaseApi": {
+          "id": "NjzTGuT7vXbgMbAx",
+          "name": "Supabase n8n"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a helpful assistant that generates search queries based on category. There will be multiple category seperated by comma. Only generate one search query with one topic for today. Today's time {{ $now }}, text only without \"\" or ''",
+              "role": "system"
+            },
+            {
+              "content": "={{ $json.category }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "204bd9de-3ce8-4f85-9762-a39cafa10705",
+      "name": "Natural Language for News Retrival",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [1260, 1560],
+      "alwaysOutputData": true,
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8Uv",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are a Blog copywriter. Your task is to repurpose the user's article content into compelling Blog posts.\n\nWorkflow:\n\n1. Assess the article for sufficient context and content to create a Blog post. If inadequate, return false.\n2. Repurpose the article into a Blog post\n\nBlog Post Requirements:\n\nEach post must be at least 400 words. Add your insights to the articles to make it personal.\n\nCreator Tones:\n- Willing to learn latest AI trends\n- Want to help others in AI Transformation",
+              "role": "system"
+            },
+            {
+              "content": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c5c7280f-47a6-40e2-b3d3-b6959a3057e6",
+      "name": "Article Repurpose",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [1260, 1760],
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8Uv",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a blog copywriter. Based on the content to create a blog title.",
+              "role": "system"
+            },
+            {
+              "content": "={{ $json.message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8784edb1-9fc3-4890-a95a-32cfffb9ba81",
+      "name": "Convert Title",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [980, 1980],
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8Uv",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "You are a blog copywriter. Based on the content to create a blog simple description in 30 words.",
+              "role": "system"
+            },
+            {
+              "content": "={{ $('If false').item.json.message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2c7ac6a1-8546-477d-ab8a-af64304f5d23",
+      "name": "Convert Excerpt",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.6,
+      "position": [1260, 1980],
+      "credentials": {
+        "openAiApi": {
+          "id": "B1xgcEjX0hRSH8Uv",
+          "name": "OpenAi Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Repurpose Blog Post and Upload",
+        "height": 698.1093998717772,
+        "width": 898.1194099151229
+      },
+      "id": "91efaf24-be5a-4788-9b2c-7e1f6e605dde",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [880, 1460]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Set Global Credential": {
+      "main": [
+        [
+          {
+            "node": "Natural Language for News Retrival",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Exa Get Content": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Article Repurpose",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Global Credential",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If false": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Convert Title",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Natural Language for News Retrival": {
+      "main": [
+        [
+          {
+            "node": "Exa Get Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Article Repurpose": {
+      "main": [
+        [
+          {
+            "node": "If false",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Title": {
+      "main": [
+        [
+          {
+            "node": "Convert Excerpt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Excerpt": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d7abf3a2-2854-4db6-86f1-4f990f74e401",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4221cc7208f142ff91856b22776eec81b71c256154ec8030569832c22d0c66d8"
+  },
+  "id": "sIXCgMLVDMiiX23z",
+  "tags": [
+    {
+      "createdAt": "2025-01-28T07:53:03.821Z",
+      "updatedAt": "2025-01-28T07:53:03.821Z",
+      "id": "UmrR2LNV3n5EWSeQ",
+      "name": "andynocode free"
+    }
+  ]
+}

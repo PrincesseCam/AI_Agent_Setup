@@ -1,0 +1,99 @@
+{
+    "name": "Workflow B - Transcribe & SRT",
+    "nodes": [
+      {
+        "id": "1",
+        "name": "Manual Trigger",
+        "type": "n8n-nodes-base.manualTrigger",
+        "typeVersion": 1,
+        "position": [240, 200],
+        "parameters": {}
+      },
+      {
+        "id": "2",
+        "name": "Whisper (Local)",
+        "type": "n8n-nodes-base.httpRequest",
+        "typeVersion": 4,
+        "position": [460, 200],
+        "parameters": {
+          "method": "POST",
+          "url": "http://localhost:5000/transcribe",
+          "sendBody": true,
+          "contentType": "multipart-form-data",
+          "bodyParameters": {
+            "parameters": [
+              {
+                "name": "response_format",
+                "value": "verbose_json"
+              },
+              {
+                "parameterType": "formBinaryData",
+                "name": "file",
+                "inputDataFieldName": "data"
+              }
+            ]
+          }
+        }
+      },
+      {
+        "id": "3",
+        "name": "Parse & Create SRT",
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [680, 200],
+        "parameters": {
+          "jsCode": "// Example code:\nreturn items.map(item => {\n  const segments = item.json.segments || [];\n\n  // Build SRT content from 'segments' data\n  let srtContent = '';\n  let index = 1;\n  for (const seg of segments) {\n    // seg.words = array of word objects, each with start/end/time\n    const start = seg.words[0].start;\n    const end = seg.words[seg.words.length - 1].end;\n    // Convert times to SRT format HH:MM:SS,ms\n    // Just an example:\n    const toSrtTime = (sec) => {\n      const h = String(Math.floor(sec / 3600)).padStart(2,'0');\n      const m = String(Math.floor((sec % 3600) / 60)).padStart(2,'0');\n      const s = String(Math.floor(sec % 60)).padStart(2,'0');\n      const ms = String(Math.round((sec - Math.floor(sec)) * 1000)).padStart(3,'0');\n      return `${h}:${m}:${s},${ms}`;\n    };\n\n    const startSrt = toSrtTime(start);\n    const endSrt = toSrtTime(end);\n    const text = seg.words.map(w => w.word).join(' ');\n\n    srtContent += `${index}\\n${startSrt} --> ${endSrt}\\n${text}\\n\\n`;\n    index++;\n  }\n\n  return {\n    json: {\n      srtContent\n    }\n  };\n});"
+        }
+      },
+      {
+        "id": "4",
+        "name": "Write SRT File",
+        "type": "n8n-nodes-base.writeBinaryFile",
+        "typeVersion": 1,
+        "position": [900, 200],
+        "parameters": {
+          "fileName": "/data/shared/subtitle.srt",
+          "fileData": "={{ $json[\"srtContent\"] }}"
+        }
+      }
+    ],
+    "connections": {
+      "Manual Trigger": {
+        "main": [
+          [
+            {
+              "node": "Whisper (Local)",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Whisper (Local)": {
+        "main": [
+          [
+            {
+              "node": "Parse & Create SRT",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Parse & Create SRT": {
+        "main": [
+          [
+            {
+              "node": "Write SRT File",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "active": false,
+    "settings": {},
+    "id": "WorkflowB-abc123"
+  }
+  

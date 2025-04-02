@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    body { 
+      background-color: #3498db; 
+      color: white; 
+      font-family: Arial, sans-serif;
+      width: 1920px;
+      height: 1080px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .container {
+      padding: 50px;
+      text-align: center;
+    }
+    .question { 
+      font-size: 48px; 
+      margin-bottom: 40px;
+      padding: 20px;
+    }
+    .answers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      grid-gap: 20px;
+      width: 80%;
+      margin: 0 auto;
+    }
+    .answer {
+      background-color: rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 15px;
+      font-size: 36px;
+      display: flex;
+      align-items: center;
+    }
+    .letter {
+      background-color: white;
+      color: #3498db;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-right: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="question">What is the output of print(2 * 3 + 4)?</div>
+    <div class="answers">
+      <div class="answer"><span class="letter">A</span> 14</div>
+      <div class="answer"><span class="letter">B</span> 6</div>
+      <div class="answer"><span class="letter">C</span> 10</div>
+      <div class="answer"><span class="letter">D</span> 8</div>
+    </div>
+  </div>
+</body>
+</html>

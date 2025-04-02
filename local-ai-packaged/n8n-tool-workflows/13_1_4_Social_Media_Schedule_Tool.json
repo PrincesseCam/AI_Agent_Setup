@@ -1,0 +1,313 @@
+{
+  "name": "13.1.4 Social Media Schedule Tool",
+  "nodes": [
+    {
+      "parameters": {
+        "text": "={{ $json.query.content }}",
+        "additionalFields": {}
+      },
+      "id": "f084281b-9e00-4f00-9e00-aa733b1e77ab",
+      "name": "Create X",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        20,
+        -80
+      ],
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "R0VQsL9uQ6pYujxV",
+          "name": "X account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "person": "tfgI_LY1Fv",
+        "text": "={{ $json.query.content }}",
+        "additionalFields": {}
+      },
+      "id": "a5d12934-b8ae-425e-8d50-4da421771538",
+      "name": "Create Linkedin",
+      "type": "n8n-nodes-base.linkedIn",
+      "typeVersion": 1,
+      "position": [
+        20,
+        100
+      ],
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "pDeKtoWm7Nh6wxKR",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpRequestMethod": "POST",
+        "graphApiVersion": "v20.0",
+        "node": "/112817108409111/feed",
+        "options": {
+          "queryParametersJson": "={\n  \"message\": {{ JSON.stringify( $json.query.content ) }},\n  \"published\":\"true\"\n}"
+        }
+      },
+      "id": "992b5d0a-b81d-494d-86af-0b94f84e6d6a",
+      "name": "Facebook Graph API",
+      "type": "n8n-nodes-base.facebookGraphApi",
+      "typeVersion": 1,
+      "position": [
+        20,
+        300
+      ],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "jpWnrKYloFJLEXG8",
+          "name": "Facebook Graph account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.query.platform.toLowerCase() }}",
+                    "rightValue": "x",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "X"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "678c0c8d-6cb6-47cf-ada1-85303cd01fc0",
+                    "leftValue": "={{ $json.query.platform.toLowerCase() }}",
+                    "rightValue": "linkedin",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Linkedin"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "81fb1d33-52f3-48c7-803c-5a799148af03",
+                    "leftValue": "={{ $json.query.platform.toLowerCase() }}",
+                    "rightValue": "facebook",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Facebook"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "98f11734-729d-4b3e-82c9-1954cd6d5f47",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -480,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.query.graphic }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -160,
+        100
+      ],
+      "id": "02ffedfb-162c-4e5c-b8b8-dfcec4d4498a",
+      "name": "Download Image"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e760316-67ea-46da-8419-dc377d790bb2",
+              "name": "response",
+              "value": "={{ $json }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        100
+      ],
+      "id": "a271327c-c801-4531-bede-e2bee98542d4",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {},
+      "id": "cb6121c7-6304-40fd-b971-1ac957364a9b",
+      "name": "Execute Workflow Trigger",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "position": [
+        -700,
+        100
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "pinData": {
+    "Execute Workflow Trigger": [
+      {
+        "json": {
+          "query": {
+            "platform": "linkedin",
+            "title": "Unlock Efficient Workflows with n8n: The Ultimate Automation Tool",
+            "content": "In today's fast-paced world, automation is key to staying ahead. Enter n8n, an open-source workflow automation tool designed to simplify your processes. Whether you're a developer or not, n8n offers a user-friendly interface to streamline tasks, making it accessible to everyone.\n\nKey Features of n8n:\n\n- User-Friendly Interface: n8n's intuitive design allows you to create workflows without needing to write code. Drag and drop nodes to design your perfect workflow.\n  \n- Extensive Integrations: With over 200 nodes, n8n integrates seamlessly with popular apps like Slack, Gmail, and more. Automate social media posts or lead management with ease.\n\n- Custom Nodes: Extend n8n's functionality by creating custom nodes, tailored to your specific needs.\n\n- Community-Driven: As an open-source tool, n8n benefits from a vibrant community, ensuring continuous improvement and a wealth of resources.\n\n- Hosting Options: Choose between self-hosted or cloud-based solutions, giving you flexibility to suit your organization's needs.\n\nUse Cases for n8n:\n\n- Social Media Management: Automate posting across multiple platforms, saving time and ensuring consistent engagement.\n\n- Lead Management: Streamline your sales process by automating lead generation and follow-ups.\n\n- Data Processing: Efficiently manage and transform data across different services without manual intervention.\n\nConclusion:\n\nn8n is a powerful tool that can transform how you handle workflows. Its open-source nature, coupled with a supportive community, makes it a versatile solution for businesses of all sizes. Whether you're automating simple tasks or complex processes, n8n offers the flexibility and customization you need.\n\nCall to Action: Ready to enhance your workflow efficiency? Dive into n8n today and explore how it can revolutionize your operations. Share your thoughts or experiences with n8n in the comments below—we'd love to hear from you!",
+            "graphic": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-B2NsylLc5NBXnIOyO6BZxIjC/user-yuCD9GhngKuLbHQ1nwor6zBc/img-fskEFZ911qiOi3COucbuUPdH.png?st=2025-02-17T11%3A08%3A25Z&se=2025-02-17T13%3A08%3A25Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-02-17T06%3A19%3A20Z&ske=2025-02-18T06%3A19%3A20Z&sks=b&skv=2024-08-04&sig=%2Buxj/oSlnyXDcK4f3fpWq/N76ZpS4RB8uwQ/kCuml/U%3D",
+            "type": "post"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Create X": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Linkedin": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Graph API": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Create X",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Facebook Graph API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Create Linkedin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "79cb4de4-d3af-4397-814a-d39b08453dec",
+  "meta": {
+    "instanceId": "4221cc7208f142ff91856b22776eec81b71c256154ec8030569832c22d0c66d9"
+  },
+  "id": "QblDrYaTwX7HXgeF",
+  "tags": []
+}

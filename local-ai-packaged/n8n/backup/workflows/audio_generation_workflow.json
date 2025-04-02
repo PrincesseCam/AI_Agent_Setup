@@ -1,0 +1,498 @@
+{
+  "name": "audio-generation-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "audio-generation",
+        "options": {}
+      },
+      "name": "Audio Generation Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -1520,
+        160
+      ],
+      "webhookId": "audio-generation",
+      "id": "d5ae9c31-349f-4955-9783-87ce19415c26"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Load default voice settings\nconst defaultVoiceSettings = {\n  elevenlabsVoiceId: \"21m00Tcm4TlvDq8ikWAM\", // Default voice ID - change this to your preferred voice\n  stability: 0.5,\n  similarity_boost: 0.85\n};\n\n// Get voice settings from environment or use defaults\nreturn {\n  ...$input.item.json,\n  voiceSettings: defaultVoiceSettings\n};"
+      },
+      "name": "Prepare Voice Settings",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1260,
+        160
+      ],
+      "id": "772c2432-3dba-46cf-9e85-97f330d58f75"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.elevenlabs.io/v1/text-to-speech/{{$json.voiceSettings.elevenlabsVoiceId}}/stream",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\"text\":{{ JSON.stringify($('Audio Generation Webhook').item.json.body.fullScript) }},\"model_id\":\"eleven_monolingual_v1\",\"voice_settings\":{\"stability\":{{ $json.voiceSettings.stability }},\"similarity_boost\":{{ $json.voiceSettings.similarity_boost }}}}",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "name": "Generate Voice with ElevenLabs",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -1080,
+        160
+      ],
+      "id": "69317fe8-bb00-4415-a137-a5493aeebde9",
+      "notesInFlow": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "8HFfrl8zYIZ91B7d",
+          "name": "ElevenLabs_youtube"
+        }
+      },
+      "notes": "If you want more parameter\n{\"text\":{{ JSON.stringify($('Audio Generation Webhook').item.json.body.fullScript) }},\"model_id\":\"eleven_monolingual_v1\",\"voice_settings\":{\"stability\":{{ $json.voiceSettings.stability }},\"similarity_boost\":{{ $json.voiceSettings.similarityBoost }}}}"
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $('Audio Generation Webhook').item.json.body.directories.audio }}/narration.mp3",
+        "options": {}
+      },
+      "name": "Save Audio File",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        160
+      ],
+      "id": "5f27b844-b7ba-4f0f-8b67-a2d7d9127b9d"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract duration and subtitle data\nconst audioLength = $input.item.json.audioLength || 60;\nconst subtitles = $input.item.json.subtitles || {};\n\n// Prepare minimal data for next workflow\nreturn {\n  contentId: $input.item.json.contentId,\n  directories: $input.item.json.directories,\n  title: $input.item.json.title,\n  audioLength: audioLength,\n  audioComplete: true,\n  audioFile: $input.item.json.directories.audio + \"/narration.mp3\",\n  subtitles: subtitles\n};"
+      },
+      "name": "Process Audio Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        120,
+        160
+      ],
+      "id": "d23ffa34-10f5-4326-9eec-672cec34ffc3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare completion signal data\nconst completionPath = $input.item.json.directories.main + \"/audio_complete.json\";\nconst completionData = {\n  contentId: $input.item.json.contentId,\n  audioComplete: true,\n  audioLength: $input.item.json.audioLength || 60,\n  audioFile: $input.item.json.audioFile,\n  subtitlesPath: $input.item.json.subtitles.srtPath,\n  timestamp: new Date().toISOString()\n};\n\n// Convert to JSON string with proper formatting\nconst jsonString = JSON.stringify(completionData, null, 2);\n\n// Convert to buffer\nconst buffer = Buffer.from(jsonString, 'utf-8');\n\nreturn [\n  {\n    json: {\n      ...$input.item.json,\n      completionPath,\n      completionData: completionData\n    },\n    binary: {\n      data: {\n        data: buffer,\n        mimeType: 'application/json',\n        fileName: 'audio_complete.json'\n      }\n    }\n  }\n];"
+      },
+      "name": "Prepare Completion Signal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        300,
+        160
+      ],
+      "id": "95746bb3-95e1-414b-9c1f-55a24c942fa6"
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $json.completionPath }}",
+        "options": {}
+      },
+      "name": "Write Completion Signal",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        500,
+        160
+      ],
+      "id": "141f2326-e7b6-4b4e-82c3-e03b8b881066"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5678/webhook-test/check-assembly-readiness",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {contentId: $json.contentId, audioComplete: true, directories: $json.directories} }}",
+        "options": {}
+      },
+      "name": "Signal Assembly Readiness",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        740,
+        160
+      ],
+      "id": "ad6241fb-8a2a-4c73-a929-9a419068689c"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        740,
+        0
+      ],
+      "id": "fbfdc92a-4584-4f22-8a56-6b7477ebc4f2"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://192.168.40.98:5000/transcribe",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            },
+            {
+              "name": "language",
+              "value": "en"
+            },
+            {
+              "name": "word_timestamps",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1120,
+        -280
+      ],
+      "id": "3f5b6def-659e-40c5-917c-5edb76bcc894",
+      "name": "Get Audio Duration with Whisper"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process Whisper response to extract duration and transcription\nconst whisperResponse = $input.item.json;\n\n// Calculate total audio duration from segments\nlet audioLength = 0;\nlet transcriptionText = whisperResponse.text || \"\";\nlet wordTimestamps = [];\n\n// Extract timing information and word timestamps\nif (whisperResponse.segments && whisperResponse.segments.length > 0) {\n  // Get the last segment's end time as the total duration\n  const lastSegment = whisperResponse.segments[whisperResponse.segments.length - 1];\n  audioLength = lastSegment.end || 0;\n  \n  // Collect word timestamps if available\n  if (whisperResponse.word_timestamps) {\n    wordTimestamps = whisperResponse.word_timestamps;\n  }\n  // If not available but segments have words with timestamps\n  else if (whisperResponse.segments[0].words) {\n    whisperResponse.segments.forEach(segment => {\n      if (segment.words) {\n        wordTimestamps = wordTimestamps.concat(segment.words);\n      }\n    });\n  }\n}// Process Whisper response to extract duration, transcription and word timestamps\nconst whisperResponse = $input.item.json;\nconst contentId = $('Audio Generation Webhook').item.json.body.contentId;\nconst directories = $('Audio Generation Webhook').item.json.body.directories;\nconst title = $('Audio Generation Webhook').item.json.body.title || \"Tech Trends Video\";\n\n// Initialize default values\nlet audioLength = 60; // Default 60 seconds\nlet transcriptionText = \"\";\nlet wordTimestamps = [];\nlet segments = [];\n\n// Extract timing information and word timestamps\nif (whisperResponse && whisperResponse.text) {\n  transcriptionText = whisperResponse.text;\n  \n  // Process segments if available\n  if (whisperResponse.segments && Array.isArray(whisperResponse.segments) && whisperResponse.segments.length > 0) {\n    segments = whisperResponse.segments;\n    \n    // Get the last segment's end time as the total duration\n    const lastSegment = segments[segments.length - 1];\n    audioLength = lastSegment.end || audioLength;\n    \n    // Extract words with timestamps if available\n    segments.forEach(segment => {\n      if (segment.words && Array.isArray(segment.words)) {\n        wordTimestamps = [...wordTimestamps, ...segment.words];\n      }\n    });\n  }\n}\n\n// Format SRT subtitles from transcription data\nconst formatSrtTime = (seconds) => {\n  const pad = (num) => (num < 10 ? \"0\" + num : num);\n  const hours = Math.floor(seconds / 3600);\n  const minutes = Math.floor((seconds % 3600) / 60);\n  const secs = Math.floor(seconds % 60);\n  const ms = Math.floor((seconds * 1000) % 1000);\n  return `${pad(hours)}:${pad(minutes)}:${pad(secs)},${ms.toString().padStart(3, '0')}`;\n};\n\n// Generate subtitle segments with optimal reading chunks\nconst subtitleSegments = [];\nif (segments.length > 0) {\n  segments.forEach((segment, index) => {\n    const text = segment.text.trim();\n    // Split long segments into readable chunks\n    if (text.length > 50) {\n      const parts = text.split(/[.!?] /).filter(Boolean);\n      let startTime = segment.start;\n      \n      parts.forEach((part, i) => {\n        // Calculate duration for each part proportionally\n        const partDuration = (segment.end - segment.start) * (part.length / text.length);\n        const endTime = i === parts.length - 1 ? segment.end : startTime + partDuration;\n        \n        subtitleSegments.push({\n          index: subtitleSegments.length + 1,\n          start: startTime,\n          end: endTime,\n          text: part.trim() + (part.endsWith('.') || part.endsWith('!') || part.endsWith('?') ? '' : '.')\n        });\n        \n        startTime = endTime;\n      });\n    } else {\n      subtitleSegments.push({\n        index: subtitleSegments.length + 1,\n        start: segment.start,\n        end: segment.end,\n        text: text\n      });\n    }\n  });\n}\n\n// Generate SRT content\nlet srtContent = \"\";\nsubtitleSegments.forEach(sub => {\n  srtContent += `${sub.index}\\n${formatSrtTime(sub.start)} --> ${formatSrtTime(sub.end)}\\n${sub.text}\\n\\n`;\n});\n\n// Generate VTT content (more modern subtitle format)\nlet vttContent = \"WEBVTT\\n\\n\";\nsubtitleSegments.forEach(sub => {\n  vttContent += `${formatSrtTime(sub.start).replace(',', '.')} --> ${formatSrtTime(sub.end).replace(',', '.')}\\n${sub.text}\\n\\n`;\n});\n\n// Prepare paths for subtitle files\nconst srtFilePath = `${directories.main}/subtitles.srt`;\nconst vttFilePath = `${directories.main}/subtitles.vtt`;\n\nreturn {\n  contentId: contentId,\n  directories: directories,\n  title: title,\n  audioLength: audioLength, \n  audioComplete: true,\n  audioFile: `${directories.audio}/narration.mp3`,\n  transcription: transcriptionText,\n  wordTimestamps: wordTimestamps,\n  segments: segments,\n  subtitles: {\n    srt: {\n      content: srtContent,\n      path: srtFilePath\n    },\n    vtt: {\n      content: vttContent,\n      path: vttFilePath\n    }\n  }\n};\n\nreturn {\n  contentId: $input.item.json.contentId,\n  directories: $input.item.json.directories,\n  title: $input.item.json.title || \"Tech Trends Video\",\n  audioLength: audioLength,\n  audioComplete: true,\n  audioFile: $input.item.json.directories.audio + \"/narration.mp3\",\n  transcription: transcriptionText,\n  wordTimestamps: wordTimestamps\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -940,
+        -280
+      ],
+      "id": "de5dcc0b-c03c-4676-88a3-44ef22a2af3f",
+      "name": "extract the duration and transcription"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -760,
+        -280
+      ],
+      "id": "91d31cd1-2d55-4421-a92b-564e687eacc5",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $json.subtitles.srtPath }}",
+        "dataPropertyName": "srt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        160
+      ],
+      "id": "18e6842f-a4e0-4c3f-b8e6-f79e8937b8c6",
+      "name": "save the subtitle files"
+    },
+    {
+      "parameters": {
+        "command": "=# Get accurate duration of the generated audio file\nffmpeg -i \"{{ $('Audio Generation Webhook').item.json.body.directories.audio }}/narration.mp3\" -f null - 2>&1 | grep -o 'time=[0-9:]\\+\\.[0-9]\\+' | tail -1 | sed 's/time=//' > /tmp/duration.txt\n\n# Convert the duration to seconds for easier processing\nduration=$(cat /tmp/duration.txt)\necho \"Raw duration: $duration\"\n\n# Convert HH:MM:SS.MS format to seconds\nhours=$(echo $duration | cut -d: -f1)\nminutes=$(echo $duration | cut -d: -f2)\nseconds=$(echo $duration | cut -d: -f3)\n\ntotal_seconds=$(echo \"$hours * 3600 + $minutes * 60 + $seconds\" | bc)\necho \"Total duration in seconds: $total_seconds\"\n\n# Get the script content for subtitle generation\necho \"Script content for subtitle generation:\"\ncat \"{{ $('Audio Generation Webhook').item.json.body.directories.main }}/script.txt\""
+      },
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        160
+      ],
+      "id": "29dd9bb1-3df3-4a8d-be48-67221ddf5043",
+      "name": "Get Audio Duration with FFmpeg",
+      "notes": "docker exec ffmpeg ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 {{ $('Audio Generation Webhook').item.json.body.directories.audio }}/narration_dur.mp3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get duration from FFmpeg output\nconst stdout = $input.first().json.stdout;\nconst durationMatch = stdout.match(/Total duration in seconds: ([0-9.]+)/);\n\n// Default duration if we can't extract it\nlet audioDuration = 60;\nif (durationMatch && durationMatch[1]) {\n  audioDuration = parseFloat(durationMatch[1]);\n}\n\n// Get the content ID and directories\nconst contentId = $('Audio Generation Webhook').item.json.body.contentId;\nconst directories = $('Audio Generation Webhook').item.json.body.directories;\n\n// Get the script content for generating subtitles\nconst scriptContent = $('Audio Generation Webhook').item.json.body.fullScript || '';\n\n// Parse script into meaningful segments for subtitles\nconst generateSubtitleSegments = (script, totalDuration) => {\n  // Split on sentence-ending punctuation followed by space or newline\n  const rawSentences = script.split(/([.!?])\\s+|\\n+/).filter(Boolean);\n  \n  // Combine fragments into complete sentences\n  const sentences = [];\n  let currentSentence = '';\n  \n  rawSentences.forEach((fragment) => {\n    if (/[.!?]/.test(fragment) && fragment.length === 1) {\n      // This is just a punctuation mark, add it to the current sentence\n      currentSentence += fragment;\n      sentences.push(currentSentence.trim());\n      currentSentence = '';\n    } else {\n      // This is text content\n      currentSentence += fragment + (currentSentence ? ' ' : '');\n    }\n  });\n  \n  // Add any remaining content\n  if (currentSentence.trim()) {\n    sentences.push(currentSentence.trim());\n  }\n  \n  // Estimate time per sentence, weighted by length\n  const totalCharCount = sentences.reduce((sum, s) => sum + s.length, 0);\n  \n  // Create segments with timestamps\n  const segments = [];\n  let currentTime = 0;\n  \n  sentences.forEach((sentence, index) => {\n    const sentenceDuration = (sentence.length / totalCharCount) * totalDuration;\n    const startTime = currentTime;\n    const endTime = currentTime + sentenceDuration;\n    \n    segments.push({\n      index: index + 1,\n      startTime: startTime,\n      endTime: endTime,\n      text: sentence\n    });\n    \n    currentTime = endTime;\n  });\n  \n  return segments;\n};\n\n// Format time for SRT (00:00:00,000)\nconst formatSrtTime = (seconds) => {\n  const hours = Math.floor(seconds / 3600);\n  const minutes = Math.floor((seconds % 3600) / 60);\n  const secs = Math.floor(seconds % 60);\n  const ms = Math.floor((seconds * 1000) % 1000);\n  \n  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')},${ms.toString().padStart(3, '0')}`;\n};\n\n// Generate subtitles\nconst subtitleSegments = generateSubtitleSegments(scriptContent, audioDuration);\n\n// Create SRT content\nlet srtContent = '';\nsubtitleSegments.forEach(segment => {\n  srtContent += `${segment.index}\\n${formatSrtTime(segment.startTime)} --> ${formatSrtTime(segment.endTime)}\\n${segment.text}\\n\\n`;\n});\n\n// Define paths\nconst srtPath = `${directories.main}/subtitles.srt`;\nconst vttPath = `${directories.main}/subtitles.vtt`;\n\n// Create VTT content (Web Video Text Tracks format)\nlet vttContent = 'WEBVTT\\n\\n';\nsubtitleSegments.forEach(segment => {\n  // VTT uses . instead of , for milliseconds\n  const vttStart = formatSrtTime(segment.startTime).replace(',', '.');\n  const vttEnd = formatSrtTime(segment.endTime).replace(',', '.');\n  vttContent += `${vttStart} --> ${vttEnd}\\n${segment.text}\\n\\n`;\n});\n\nreturn {\n  contentId,\n  directories,\n  title: $('Audio Generation Webhook').item.json.body.title || 'Tech Trends Video',\n  audioLength: audioDuration,\n  audioComplete: true,\n  audioFile: `${directories.audio}/narration.mp3`,\n  subtitles: {\n    srtContent,\n    srtPath,\n    vttContent,\n    vttPath\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -500,
+        160
+      ],
+      "id": "46bb5b13-394e-4e45-af5c-c45139404468",
+      "name": "Extract Duration and Generate Subtitles"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare the subtitle content for saving\nconst srtContent = $input.item.json.subtitles.srtContent;\nconst vttContent = $input.item.json.subtitles.vttContent || '';\n\n// Create buffers for both formats\nconst srtBuffer = Buffer.from(srtContent, 'utf-8');\nconst vttBuffer = Buffer.from(vttContent, 'utf-8');\n\nreturn [\n  {\n    json: $input.item.json,\n    binary: {\n      srt: {\n        data: srtBuffer,\n        mimeType: 'text/plain',\n        fileName: 'subtitles.srt'\n      },\n      vtt: {\n        data: vttBuffer,\n        mimeType: 'text/plain',\n        fileName: 'subtitles.vtt'\n      }\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -300,
+        160
+      ],
+      "id": "5820ee18-2cd1-40e1-aea5-e83bae3b430c",
+      "name": "Prepare Subtitle Binary"
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "={{ $json.subtitles.vttPath }}",
+        "dataPropertyName": "vtt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -120,
+        -20
+      ],
+      "id": "a927d7dc-908e-4591-bbc8-e371d2624e0b",
+      "name": "Save the Subtitle Files VTT"
+    }
+  ],
+  "pinData": {
+    "Audio Generation Webhook": [
+      {
+        "json": {
+          "headers": {
+            "accept": "application/json,text/*;q=0.99",
+            "content-type": "application/json",
+            "user-agent": "axios/1.7.4",
+            "content-length": "2404",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "host": "host.docker.internal:5678",
+            "connection": "keep-alive"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "contentId": "video_1741064777985",
+            "directories": {
+              "main": "/data/shared/video_1741064777985/main",
+              "audio": "/data/shared/video_1741064777985/audio",
+              "images": "/data/shared/video_1741064777985/images",
+              "video": "/data/shared/video_1741064777985/video",
+              "final": "/data/shared/video_1741064777985/final"
+            },
+            "fullScript": "Welcome, tech enthusiasts! Are you ready to witness the most incredible advancements that have shaped our world over the past decade? Let's dive into a countdown of the top tech trends that changed everything. From smartphones to AI, let’s explore how these innovations have transformed our lives and paved the way for the future.\n\n10 years ago, the first iPhone was introduced, ushering in the era of mobile computing. It changed not just how we communicate but also how we access information and entertain ourselves. Today, smartphones are more powerful than ever, with 5G networks revolutionizing our connectivity.\n\nMoving to the year 2018, the release of the first consumer drone was a huge leap forward. Drones have since become essential for everything from delivery services to aerial photography. They’ve opened up new possibilities in various industries, making work and play more efficient and exciting.\n\nIn 2020, the global pandemic pushed the world into digital transformation like never before. Video conferencing tools like Zoom and Microsoft Teams became daily necessities. These platforms not only kept us connected but also transformed how we learn and work remotely.\n\n2021 saw the rise of sustainable tech. Electric vehicles are becoming more accessible, and renewable energy sources are increasingly being adopted worldwide. This shift towards sustainability is crucial for our planet’s future.\n\nThe year 2023 marks a major milestone in artificial intelligence. Large language models like ChatGPT have shown that AI can now understand and generate human-like text. This opens up new frontiers in customer service, content creation, and even healthcare.\n\nFrom mobile technology to sustainable tech and the rise of AI, the past decade has been nothing short of revolutionary. But there’s more on the horizon! What tech trends do you think will shape our world in the next 10 years?\n\nJoin us for more insights and discussions on the future of tech. Don’t forget to like, share, and subscribe if you’re as excited about these advancements as we are.\n"
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/audio-generation",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Audio Generation Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Voice Settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Voice Settings": {
+      "main": [
+        [
+          {
+            "node": "Generate Voice with ElevenLabs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Voice with ElevenLabs": {
+      "main": [
+        [
+          {
+            "node": "Save Audio File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Audio File": {
+      "main": [
+        [
+          {
+            "node": "Get Audio Duration with FFmpeg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Audio Data": {
+      "main": [
+        [
+          {
+            "node": "Prepare Completion Signal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Completion Signal": {
+      "main": [
+        [
+          {
+            "node": "Write Completion Signal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Completion Signal": {
+      "main": [
+        [
+          {
+            "node": "Signal Assembly Readiness",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio Duration with Whisper": {
+      "main": [
+        [
+          {
+            "node": "extract the duration and transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extract the duration and transcription": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        []
+      ]
+    },
+    "save the subtitle files": {
+      "main": [
+        [
+          {
+            "node": "Process Audio Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio Duration with FFmpeg": {
+      "main": [
+        [
+          {
+            "node": "Extract Duration and Generate Subtitles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Duration and Generate Subtitles": {
+      "main": [
+        [
+          {
+            "node": "Prepare Subtitle Binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Subtitle Binary": {
+      "main": [
+        [
+          {
+            "node": "save the subtitle files",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Save the Subtitle Files VTT",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save the Subtitle Files VTT": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c473c27c-e2d3-4ce0-8340-0266e82d012a",
+  "meta": {
+    "instanceId": "4e52379637041ff10799c16d4fe1175e0d88d75b24685ea7cde857d7eef2b827"
+  },
+  "id": "Y8JFKWIUhLy7ipJG",
+  "tags": [
+    {
+      "createdAt": "2025-02-26T15:32:11.089Z",
+      "updatedAt": "2025-02-26T15:32:11.089Z",
+      "id": "He5P86YILA9R8z98",
+      "name": "content-creation"
+    }
+  ]
+}

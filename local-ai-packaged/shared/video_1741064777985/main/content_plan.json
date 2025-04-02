@@ -1,0 +1,55 @@
+{
+  "output": [
+    {
+      "description": "A countdown of the top tech advancements of the past decade",
+      "topic": "Tech Trends of the Decade"
+    },
+    {
+      "description": "How AI-powered assistants are changing the way we interact with technology",
+      "topic": "The Rise of Voice Assistants"
+    },
+    {
+      "description": "Understanding the latest threats and how to stay safe online",
+      "topic": "Breaking Down Cybersecurity Threats"
+    },
+    {
+      "description": "What to expect from the next generation of connected living",
+      "topic": "The Future of Smart Homes"
+    },
+    {
+      "description": "How technology is revolutionizing the way we learn",
+      "topic": "Top Tech Innovations in Education"
+    }
+  ],
+  "selectedTopic": {
+    "description": "A countdown of the top tech advancements of the past decade",
+    "topic": "Tech Trends of the Decade"
+  },
+  "allTopics": [
+    {
+      "description": "A countdown of the top tech advancements of the past decade",
+      "topic": "Tech Trends of the Decade"
+    },
+    {
+      "description": "How AI-powered assistants are changing the way we interact with technology",
+      "topic": "The Rise of Voice Assistants"
+    },
+    {
+      "description": "Understanding the latest threats and how to stay safe online",
+      "topic": "Breaking Down Cybersecurity Threats"
+    },
+    {
+      "description": "What to expect from the next generation of connected living",
+      "topic": "The Future of Smart Homes"
+    },
+    {
+      "description": "How technology is revolutionizing the way we learn",
+      "topic": "Top Tech Innovations in Education"
+    }
+  ],
+  "workflowData": {
+    "topic": "Tech Trends of the Decade",
+    "topicDescription": "A countdown of the top tech advancements of the past decade",
+    "publishSettings": {}
+  }
+}

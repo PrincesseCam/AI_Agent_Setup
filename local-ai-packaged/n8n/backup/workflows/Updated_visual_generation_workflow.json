@@ -1,0 +1,651 @@
+{
+  "name": "Updated visual-generation-workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "visual-generation",
+        "options": {}
+      },
+      "name": "Visual Generation Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -3220,
+        240
+      ],
+      "webhookId": "visual-generation",
+      "id": "6a30a127-441c-41db-aefd-44b9ffa773db"
+    },
+    {
+      "parameters": {
+        "model": "qwen2.5-coder:latest",
+        "options": {
+          "format": "json"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        -3060,
+        440
+      ],
+      "id": "28d38469-cd28-4413-bace-3ed3d992fc2c",
+      "name": "Ollama Chat Model",
+      "credentials": {
+        "ollamaApi": {
+          "id": "DbnV7fE9lNsuBlSr",
+          "name": "Ollama account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a visual director specializing in creating compelling visual descriptions for videos. For each section of a script, you need to generate a more detailed visual prompt that will be used to create captivating images.\n\nI will provide you with section content and a basic visual prompt for a video in the {{$node[\"Visual Generation Webhook\"].json.body.niche}} niche with a {{$node[\"Visual Generation Webhook\"].json.body.style}} style.\n\nFor each section, enhance the visual description to be more specific, detailed, and aligned with modern image generation techniques.\n\nExample of enhance prompt:\n  A tech support engineer in a dimly lit office, illuminated by glowing screens filled with lines of code and diagnostic tools. He waves a mouse like a wand, as digital sparks and holographic UI elements float around him. His desk is cluttered with cables, keyboards, and a steaming cup of coffee. The background features server racks and network diagrams, creating a futuristic and immersive tech atmosphere.\n\nProvide your response in this exact JSON format:\n{\n  \"enhanced_sections\": [\n    {\n      \"index\": 0,\n      \"section_name\": \"intro\",\n      \"original_prompt\": \"original visual prompt text\",\n      \"enhanced_prompt\": \"enhanced and detailed visual description\"\n    },\n    {\n      \"index\": 1,\n      \"section_name\": \"main_point_1\",\n      \"original_prompt\": \"original visual prompt text\",\n      \"enhanced_prompt\": \"enhanced and detailed visual description\"\n    }\n  ]\n}\n\nHere are the sections to enhance:\n{{JSON.stringify($node[\"Visual Generation Webhook\"].json.body.sections)}}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        -3040,
+        240
+      ],
+      "id": "b6e068d3-a2ff-47fe-8c34-5d7b76329732",
+      "name": "Enhance Visual Prompts",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "[\n  {\n    \"type\": \"object\",\n    \"properties\": {\n      \"enhanced_sections\": {\n        \"type\": \"array\",\n        \"items\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"index\": { \"type\": \"number\" },\n            \"section_name\": { \"type\": \"string\" },\n            \"original_prompt\": { \"type\": \"string\" },\n            \"enhanced_prompt\": { \"type\": \"string\" }\n          },\n          \"required\": [\"index\", \"section_name\", \"original_prompt\", \"enhanced_prompt\"]\n        }\n      }\n    },\n    \"required\": [\"enhanced_sections\"]\n  }\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -2840,
+        440
+      ],
+      "id": "498f1088-fe9b-4fcf-ac6c-171b1023131a",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract sections and initialize variables \nlet sections = $input.first().json.output.enhanced_sections || [];\nlet niche = $('Visual Generation Webhook').first().json.body.niche || 'tech';\nlet style = $('Visual Generation Webhook').first().json.body.style || 'informative';\nlet contentId = $('Visual Generation Webhook').first().json.body.contentId || `fallback_${Date.now()}`;\nlet directories = $('Visual Generation Webhook').first().json.body.directories || {\n    main: \"/data/shared/fallback/main\",\n    audio: \"/data/shared/fallback/audio\",\n    images: \"/data/shared/fallback/images\",\n    video: \"/data/shared/fallback/video\",\n    final: \"/data/shared/fallback/final\"\n};\n\n// Create image prompts array for batching\nconst imagePrompts = sections.map((section, index) => {\n    return {\n        index,\n        section_name: section.section_name,\n        prompt: section.original_prompt,\n        enhancedPrompt: section.enhanced_prompt\n    };\n});\n\n// Default image settings optimized for NVIDIA 3050\nconst defaultImageSettings = {\n    width: 768,\n    height: 768,\n    steps: 30,\n    cfgScale: 7,\n    sampler: \"Euler a\",\n    negativePrompt: \"low quality, blurry, distorted, deformed, disfigured, bad anatomy, watermark, signature, out of frame, cropped\"\n};\n\nreturn {\n    contentId,\n    directories,\n    niche,\n    style,\n    imagePrompts,\n    imageSettings: defaultImageSettings,\n    totalImages: imagePrompts.length,\n    completedImages: 0,\n    // Initialize with the first image for the first batch\n    currentImageIndex: 0\n};"
+      },
+      "name": "Prepare Image Prompts",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -2640,
+        240
+      ],
+      "id": "940d3a96-4884-4ed0-af70-9352a04fe05c"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:7861/sdapi/v1/txt2img",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"prompt\": \"{{ $json.imagePrompts.enhancedPrompt }}, 8k, high quality, trending on artstation\",\n  \"negative_prompt\": \"{{$node[\"Prepare Image Prompts\"].json[\"imageSettings\"][\"negativePrompt\"]}}\",\n  \"width\": {{$node[\"Prepare Image Prompts\"].json[\"imageSettings\"][\"width\"]}},\n  \"height\": {{$node[\"Prepare Image Prompts\"].json[\"imageSettings\"][\"height\"]}},\n  \"steps\": {{$node[\"Prepare Image Prompts\"].json[\"imageSettings\"][\"steps\"]}},\n  \"cfg_scale\": {{$node[\"Prepare Image Prompts\"].json[\"imageSettings\"][\"cfgScale\"]}},\n  \"sampler_name\": \"{{$node[\"Prepare Image Prompts\"].json[\"imageSettings\"][\"sampler\"]}}\",\n  \"override_settings\": {\n    \"sd_model_checkpoint\": \"dreamshaperXL_v21TurboDPMSDE.safetensors [4496b36d48]\"\n  }\n}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "name": "Generate Image with SD",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -2000,
+        240
+      ],
+      "id": "091c76ab-1225-4282-ae4d-ac62b04d7da2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.imageGenerationSuccess }}",
+              "operation": "contains",
+              "value2": "true"
+            }
+          ]
+        }
+      },
+      "name": "Image Generation Success?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -1600,
+        240
+      ],
+      "id": "69c2f1a4-05cd-4cc1-8257-d58d263c897e"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract the image data from the response\nconst responseData = $input.item.json;\nlet imageData;\n\n// Check if the expected path exists, otherwise look for alternatives\nif (responseData.body && responseData.body.images && responseData.body.images.length > 0) {\n  imageData = responseData.body.images[0];\n} else if (responseData.images && responseData.images.length > 0) {\n  imageData = responseData.images[0];\n} else {\n  // Create a 1x1 transparent pixel as fallback\n  imageData = \"R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7\";\n  console.log(\"Using fallback image - no image data found in response\");\n}\n\n// Get the runIndex directly from the execution or use a reasonable fallback\n// This uses the Split In Batches execution index which increases with each image\nconst runIndex = $runIndex || 0;\n\n// Format the runIndex with leading zeros for sequential naming\nconst formattedIndex = runIndex.toString().padStart(2, '0');\n\n// Create a sequential filename based on the runIndex\nconst sequentialFilename = `image${formattedIndex}`;\n\n// Get section information from the input\nconst index = $input.item.json.index || 0;\nconst sectionName = $input.item.json.section_name || `section_${index}`;\n\n// Decode base64 image\nconst imageBuffer = Buffer.from(imageData, 'base64');\n\n// Return with binary data and sequential filename\nreturn [{\n  json: {\n    ...responseData,\n    currentIndex: index,\n    sectionIndex: index,\n    sectionName: sectionName,\n    sequentialFilename: sequentialFilename,\n    runIndex: runIndex  // Include this for debugging and downstream nodes\n  },\n  binary: {\n    data: {\n      data: imageBuffer,\n      mimeType: 'image/png',\n      fileName: `${sequentialFilename}.png`\n    }\n  }\n}];"
+      },
+      "name": "Process Image Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1420,
+        160
+      ],
+      "id": "fc943c6b-c42d-4989-827b-a4bde5c17496"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Create a placeholder image for failed generations\n// Get the index and format with leading zeros\nconst index = $input.item.json.index || 0;\nconst formattedIndex = index.toString().padStart(2, '0');\nconst sectionName = $input.item.json.section_name || `section_${index}`;\n\n// Create a 1x1 transparent pixel as a placeholder image\nconst placeholderBase64 = \"R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7\";\nconst imageBuffer = Buffer.from(placeholderBase64, 'base64');\n\n// Return with binary data format matching the successful case\nreturn [{\n  json: {\n    ...$input.item.json,\n    currentIndex: index,\n    sectionName: sectionName,\n    imageGenerationFailed: true\n  },\n  binary: {\n    data: {\n      data: imageBuffer,\n      mimeType: 'image/png',\n      fileName: `placeholder_${formattedIndex}.png`\n    }\n  }\n}];"
+      },
+      "name": "Handle Failed Generation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -1420,
+        320
+      ],
+      "id": "d40571b1-ded6-448b-b96c-c2a6dfb968b5"
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $(\"Visual Generation Webhook\").item.json.body.directories.images }}/{{ $json.sequentialFilename }}.png",
+        "options": {}
+      },
+      "name": "Save Generated Image",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -1240,
+        240
+      ],
+      "id": "aeee5fa6-7dd7-4d2c-9f1b-e2cb891019a7"
+    },
+    {
+      "parameters": {
+        "amount": 30,
+        "unit": "seconds"
+      },
+      "name": "GPU Cooldown",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        240
+      ],
+      "id": "dbdc0e01-efd9-4c0f-b813-4c2caafbf1ee",
+      "webhookId": "0ea7f80b-fa11-493e-9acf-85d9510dd68b"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the current run index from n8n\nconst runIndex = $runIndex || 0;\n\n// Get total images count\nconst totalImages = $node[\"Prepare Image Prompts\"].json.totalImages;\n\n// Get current local image count - this will always be 1 per execution \nlet completedImages = $input.item.json.completedImages || 0;\ncompletedImages++; // Increment for this execution\n\n// Get current image index\nlet currentImageIndex = $input.item.json.currentImageIndex || 0;\n\n// Calculate if all images are completed using runIndex\n// We need to account for zero-based indexing of runIndex\nconst allImagesCompleted = (runIndex + 1) >= totalImages;\n\n// Add detailed logging\nconsole.log(`===== DEBUG COMPLETION STATUS =====`);\nconsole.log(`Run Index: ${runIndex}`);\nconsole.log(`Total Images: ${totalImages}`);\nconsole.log(`Completed Images (local): ${completedImages}`);\nconsole.log(`Current Image Index: ${currentImageIndex}`);\nconsole.log(`All Images Completed: ${allImagesCompleted}`);\n\n// Update metadata for tracking\nconst imagesMetadata = $input.item.json.imagesMetadata || [];\nimagesMetadata.push({\n    index: currentImageIndex,\n    sectionName: $input.item.json.sectionName || $node[\"Prepare Image Prompts\"].json.imagePrompts[currentImageIndex].section_name,\n    failed: $json.imageGenerationFailed || false\n});\n\n// Calculate next image index\nlet nextImageIndex = currentImageIndex + 1;\nif (nextImageIndex >= totalImages) {\n    nextImageIndex = totalImages - 1;\n}\n\n// Return comprehensive state for next iteration\nreturn {\n    contentId: $input.item.json.contentId,\n    directories: $input.item.json.directories,\n    niche: $input.item.json.niche,\n    style: $input.item.json.style,\n    imagePrompts: $node[\"Prepare Image Prompts\"].json.imagePrompts,\n    imageSettings: $input.item.json.imageSettings,\n    totalImages: totalImages,\n    completedImages: completedImages,\n    runIndex: runIndex, // Include the run index in the output\n    allImagesCompleted: allImagesCompleted,\n    imagesMetadata: imagesMetadata,\n    currentImageIndex: nextImageIndex\n};"
+      },
+      "name": "Update Image Progress",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -920,
+        240
+      ],
+      "id": "11ff5e3f-30c6-4db5-a0a5-c80ed55ffc62"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Create completion file to signal visual generation completion\nconst directories = $node[\"Visual Generation Webhook\"].json.body.directories;\nconst contentId = $node[\"Visual Generation Webhook\"].json.body.contentId || $input.item.json.contentId;\nconst completionPath = `${directories.main}/visual_complete.json`;\n\n// Use the metadata we collected to create a more complete report\n// Get image paths using the same path pattern as used in the workflow\nconst totalImages = $input.item.json.totalImages || 0;\nconst imageFiles = [];\n\n// Generate the image file paths\nfor (let i = 0; i < totalImages; i++) {\n  const formattedIndex = i.toString().padStart(2, '0');\n  imageFiles.push(`${directories.images}/image_${formattedIndex}.png`);\n}\n\nconst completionData = {\n  contentId: contentId,\n  visualComplete: true,\n  totalImages: totalImages,\n  imageFiles: imageFiles,\n  timestamp: new Date().toISOString()\n};\n\n// Convert to JSON string with proper formatting\nconst jsonString = JSON.stringify(completionData, null, 2);\n\n// Convert to Buffer for binary data\nconst buffer = Buffer.from(jsonString, 'utf-8');\n\n// Return with proper binary data format\nreturn [\n  {\n    json: {\n      ...($input.item.json || {}),\n      completionPath: completionPath,\n      completionData: completionData,\n      visualComplete: true\n    },\n    binary: {\n      data: {\n        data: buffer,\n        mimeType: 'application/json',\n        fileName: 'visual_complete.json'\n      }\n    }\n  }\n];"
+      },
+      "name": "Prepare Completion Signal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -520,
+        160
+      ],
+      "id": "6a9ce274-86a8-4d2d-a031-1c30cc0840b7"
+    },
+    {
+      "parameters": {
+        "fileName": "={{ $json.completionPath }}",
+        "options": {}
+      },
+      "name": "Write Completion Signal",
+      "type": "n8n-nodes-base.writeBinaryFile",
+      "typeVersion": 1,
+      "position": [
+        -320,
+        160
+      ],
+      "id": "4a4e33ad-386a-4278-a1f2-c1698adea714"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=http://host.docker.internal:5678/webhook-test/check-assembly-readiness",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {contentId: $json.completionData.contentId, visualComplete: true, directories: $json.completionPath} }}",
+        "options": {}
+      },
+      "name": "Signal Assembly Readiness",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        100,
+        160
+      ],
+      "id": "59792d5c-758b-4a10-b6be-8407fe236719"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "name": "Webhook Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        320,
+        160
+      ],
+      "id": "58a4b72b-faab-4a35-8a3f-9de477851625"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log generation summary\nconst contentId = $node[\"Visual Generation Webhook\"].json.body.contentId || $input.item.json.contentId;\nconst totalImages = $input.item.json.totalImages || 0;\nconst completedImages = $input.item.json.completedImages || 0;\n\n// Determine how many images failed if that data is available\nlet failedImages = 0;\nif ($input.item.json.imagesMetadata) {\n  failedImages = $input.item.json.imagesMetadata.filter(img => img.failed).length;\n} else {\n  // Estimate failures based on completed vs total\n  failedImages = Math.max(0, totalImages - completedImages);\n}\n\nconst summary = {\n  contentId: contentId,\n  totalImagesRequested: totalImages,\n  imagesSuccessfullyGenerated: completedImages - failedImages,\n  imagesFailed: failedImages,\n  generationCompleted: new Date().toISOString()\n};\n\n// Create formatted log message\nconst logMessage = `\nVISUAL GENERATION SUMMARY\n------------------------\nContent ID: ${summary.contentId}\nTotal Images: ${summary.totalImagesRequested}\nSuccessful: ${summary.imagesSuccessfullyGenerated}\nFailed: ${summary.imagesFailed}\nCompleted at: ${summary.generationCompleted}\n`;\n\nconsole.log(logMessage);\n\nreturn {\n  ...summary,\n  ...($input.item.json)\n};"
+      },
+      "name": "Log Generation Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        -100,
+        160
+      ],
+      "id": "e3bd898a-cbdc-4c84-b3ef-b17ef379ab1e"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node to properly check Stable Diffusion API response\nconst responseData = $input.item.json;\nlet success = false;\n\n// Log the response structure for debugging\nconsole.log(\"Response structure:\", JSON.stringify(responseData, null, 2).substring(0, 500) + \"...\");\n\n// Check if the images array exists and has at least one item\nif (responseData.body && \n    responseData.body.images && \n    Array.isArray(responseData.body.images) && \n    responseData.body.images.length > 0) {\n  success = true;\n  console.log(\"Success: Found images array with data\");\n} \n// Fallback check for different response structures\nelse if (responseData.images && \n         Array.isArray(responseData.images) && \n         responseData.images.length > 0) {\n  success = true;  \n  console.log(\"Success: Found top-level images array\");\n}\n// Check for error indicators\nelse if (responseData.error || \n        (responseData.body && responseData.body.error)) {\n  success = false;\n  console.log(\"Error detected in response\");\n}\n// If nothing else helps, check if we have any data at all\nelse {\n  console.log(\"No clear success or failure indicators found\");\n  // Default to success if we have any kind of response data\n  success = Object.keys(responseData).length > 0;\n}\n\n// Return the original data plus our success flag\nreturn {\n  ...responseData,\n  imageGenerationSuccess: success\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1800,
+        240
+      ],
+      "id": "fae93d3b-cf85-4562-8e48-d242946f209e",
+      "name": "Check Image Generation Result"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "=imagePrompts",
+        "include": "allOtherFields",
+        "options": {}
+      },
+      "name": "Split Prompts",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -2440,
+        240
+      ],
+      "id": "7f8ac34e-438b-47d0-9ac7-580651234c34"
+    },
+    {
+      "parameters": {
+        "batchSize": "=1",
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -2220,
+        240
+      ],
+      "id": "7bd79b31-c761-4f2a-ab49-8219b7b80e76",
+      "name": "Process One Image at a Time"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $runIndex }}",
+              "value2": "={{ $json.totalImages - 1 }}"
+            }
+          ]
+        }
+      },
+      "name": "Image Generation Success?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -740,
+        240
+      ],
+      "id": "bb2ec531-2b75-4e04-8bb1-b7fb50c18c36"
+    }
+  ],
+  "pinData": {
+    "Visual Generation Webhook": [
+      {
+        "json": {
+          "headers": {
+            "accept": "application/json,text/*;q=0.99",
+            "content-type": "application/json",
+            "user-agent": "axios/1.7.4",
+            "content-length": "2266",
+            "accept-encoding": "gzip, compress, deflate, br",
+            "host": "host.docker.internal:5678",
+            "connection": "keep-alive"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "contentId": "video_1741064777985",
+            "directories": {
+              "main": "/data/shared/video_1741064777985/main",
+              "audio": "/data/shared/video_1741064777985/audio",
+              "images": "/data/shared/video_1741064777985/images",
+              "video": "/data/shared/video_1741064777985/video",
+              "final": "/data/shared/video_1741064777985/final"
+            },
+            "sections": [
+              {
+                "section_name": "intro",
+                "content": "Open with a visually striking background of the city at night, featuring iconic landmarks like skyscrapers and neon lights. Introduce the main character in a futuristic office setting.",
+                "visual_prompt": "The scene opens with a panoramic view of a busy city at night. The camera pans down to show a modern office building with sleek glass facades and bright, colorful advertisements."
+              },
+              {
+                "section_name": "main_1",
+                "content": "Cut to the main character walking into a meeting room, where they present their latest design project.",
+                "visual_prompt": "The camera follows the main character as they enter a large, futuristic conference room. The room is filled with high-tech equipment and large screens displaying various digital designs."
+              },
+              {
+                "section_name": "main_2",
+                "content": "In the meeting room, show reactions from other team members who appreciate the creativity and originality of the design.",
+                "visual_prompt": "Inside the conference room, the main character presents their design. The other team members lean in, looking impressed and discussing the project enthusiastically."
+              },
+              {
+                "section_name": "main_3",
+                "content": "Cut to a montage of the main character working on different projects throughout the day, showcasing their versatility and passion for design.",
+                "visual_prompt": "A series of quick shots show the main character working in various settings—on a rooftop, in an underground lab, and at a bustling event. Each scene highlights their creativity and dedication."
+              },
+              {
+                "section_name": "conclusion",
+                "content": "End with the main character receiving recognition for their work at an awards ceremony, surrounded by fellow designers and industry leaders.",
+                "visual_prompt": "The scene concludes with the main character being recognized at a prestigious design award ceremony. The room is filled with other successful designers, and they all applaud as the main character receives their trophy."
+              }
+            ],
+            "niche": "tech",
+            "style": "informative"
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/visual-generation",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "Visual Generation Webhook": {
+      "main": [
+        [
+          {
+            "node": "Enhance Visual Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Enhance Visual Prompts",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enhance Visual Prompts": {
+      "main": [
+        [
+          {
+            "node": "Prepare Image Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Enhance Visual Prompts",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Image Prompts": {
+      "main": [
+        [
+          {
+            "node": "Split Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image with SD": {
+      "main": [
+        [
+          {
+            "node": "Check Image Generation Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Generation Success?": {
+      "main": [
+        [
+          {
+            "node": "Process Image Data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Failed Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Image Data": {
+      "main": [
+        [
+          {
+            "node": "Save Generated Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Failed Generation": {
+      "main": [
+        [
+          {
+            "node": "Save Generated Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Generated Image": {
+      "main": [
+        [
+          {
+            "node": "GPU Cooldown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GPU Cooldown": {
+      "main": [
+        [
+          {
+            "node": "Update Image Progress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Image Progress": {
+      "main": [
+        [
+          {
+            "node": "Image Generation Success?1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Completion Signal": {
+      "main": [
+        [
+          {
+            "node": "Write Completion Signal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write Completion Signal": {
+      "main": [
+        [
+          {
+            "node": "Log Generation Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Signal Assembly Readiness": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Generation Summary": {
+      "main": [
+        [
+          {
+            "node": "Signal Assembly Readiness",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Image Generation Result": {
+      "main": [
+        [
+          {
+            "node": "Image Generation Success?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Prompts": {
+      "main": [
+        [
+          {
+            "node": "Process One Image at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process One Image at a Time": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Generate Image with SD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Generation Success?1": {
+      "main": [
+        [
+          {
+            "node": "Prepare Completion Signal",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Process One Image at a Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "timezone": "Asia/Tokyo"
+  },
+  "versionId": "be132ea0-efae-4cee-b11a-1b837a74f49d",
+  "meta": {
+    "instanceId": "4e52379637041ff10799c16d4fe1175e0d88d75b24685ea7cde857d7eef2b827"
+  },
+  "id": "Jc2Fk7TUistsuCG1",
+  "tags": [
+    {
+      "createdAt": "2025-02-26T15:32:11.089Z",
+      "updatedAt": "2025-02-26T15:32:11.089Z",
+      "id": "He5P86YILA9R8z98",
+      "name": "content-creation"
+    }
+  ]
+}
