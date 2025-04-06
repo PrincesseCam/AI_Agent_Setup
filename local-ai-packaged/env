@@ -6,5 +6,10 @@ POSTGRES_DB=n8n
 N8N_ENCRYPTION_KEY=secret
 N8N_USER_MANAGEMENT_JWT_SECRET=even-more-secret
 
-NGROK_AUTH_TOKEN=your-ngrok-auth-token-here
-NGROK_DOMAIN=****.app
+NGROK_AUTH_TOKEN=your-ngrok-auth-token
+NGROK_DOMAIN=your-ngrok-subdomain.ngrok.io
+WEBHOOK_URL=https://your-ngrok-subdomain.ngrok.io
+N8N_PROTOCOL=https
+N8N_HOST=your-ngrok-subdomain.ngrok.io
+N8N_PORT=5678
+VUE_APP_URL=https://your-ngrok-subdomain.ngrok.io
