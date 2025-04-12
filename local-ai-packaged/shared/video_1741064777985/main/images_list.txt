@@ -1,9 +1,0 @@
-file '/data/shared/video_1741064777985/images/image00.png'
-duration 25
-file '/data/shared/video_1741064777985/images/image01.png'
-duration 25
-file '/data/shared/video_1741064777985/images/image02.png'
-duration 25
-file '/data/shared/video_1741064777985/images/image03.png'
-duration 25
-file '/data/shared/video_1741064777985/images/image04.png'

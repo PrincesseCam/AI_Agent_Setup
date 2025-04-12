@@ -88,7 +88,8 @@ services:
   n8n:
     <<: *service-n8n
     build: 
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./Dockerfile
     container_name: n8n
     restart: unless-stopped
     ports:
@@ -120,7 +121,7 @@ services:
     restart: unless-stopped
     networks: ['demo']
     environment:
-      - NGROK_AUTHTOKEN=2vAjTCtKsfNEukIiaT4x8DZT3YN_2snTfj1SwLhpjGgjy9uvD
+      - NGROK_AUTHTOKEN=${NGROK_AUTH_TOKEN}
     command: "http --domain=blessed-urgently-goshawk.ngrok-free.app --host-header=rewrite n8n:5678 --log=stdout --log-level=debug"
 
   qdrant:
