@@ -86,10 +86,7 @@ services:
         condition: service_healthy
 
   n8n:
-    <<: *service-n8n
-    build: 
-      context: .
-      dockerfile: ./Dockerfile
+    image: n8n-custom  # We'll create this custom image(where the docker file is locally manually run: cd \local-ai-packaged\ docker build -t n8n-custom -f Dockerfile .)
     container_name: n8n
     restart: unless-stopped
     ports:
@@ -104,6 +101,14 @@ services:
       n8n-import:
         condition: service_completed_successfully
     environment:
+      - DB_TYPE=postgresdb
+      - DB_POSTGRESDB_HOST=postgres
+      - DB_POSTGRESDB_USER=${POSTGRES_USER}
+      - DB_POSTGRESDB_PASSWORD=${POSTGRES_PASSWORD}
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_PERSONALIZATION_ENABLED=false
+      - N8N_ENCRYPTION_KEY
+      - N8N_USER_MANAGEMENT_JWT_SECRET
       - N8N_HOST=${N8N_HOST}
       - N8N_PORT=${N8N_PORT}
       - N8N_PROTOCOL=${N8N_PROTOCOL}
@@ -114,6 +119,10 @@ services:
       - N8N_URL_PATH=/
       - N8N_GENERIC_SUBDOMAIN=
     networks: ['demo']
+    links:
+      - postgres
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   ngrok:
     image: ngrok/ngrok

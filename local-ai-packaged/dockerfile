@@ -1,7 +1,18 @@
 FROM n8nio/n8n:latest
 
 USER root
-RUN apk add --update python3 py3-pip gcc python3-dev musl-dev yt-dlp curl ffmpeg imagemagick
-USER node
 
-ENTRYPOINT ["node", "/usr/local/lib/node_modules/n8n/bin/n8n"]
+# Install additional tools
+RUN apk add --update \
+    python3 \
+    py3-pip \
+    gcc \
+    python3-dev \
+    musl-dev \
+    curl \
+    ffmpeg \
+    yt-dlp \
+    imagemagick
+
+# Switch back to the node user (which is the default user in the n8n image)
+USER node
